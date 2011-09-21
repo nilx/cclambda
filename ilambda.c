@@ -22,9 +22,6 @@
  * @author Nicolas Limare <nicolas.limare@cmla.ens-cachan.fr>
  */
 
-
-
-
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -45,12 +42,25 @@ int main(int argc, char *const *argv)
     if (1 > argc) {
         fprintf(stderr, "syntax: %s 'expression'\n", argv[0]);
         fprintf(stderr, "usage : cat img1.png img2.png ... | "
-		"%s 'expression' > out.png\n", argv[0]);
-	return EXIT_FAILURE;
+                "%s 'expression' > out.png\n", argv[0]);
+        return EXIT_FAILURE;
     }
 
     expr = argv[1];
-    img_in = io_png_read_flt("-", &nx, &ny, &nc);
+    /* check for __ and ; */
+    /* create lambdacode.c as a string */
+    /* compile with libtcc, keep in memory */
+    /* load the input images */
+    __a = io_png_read_pp_flt("-", &ax, &ay);
+    __b = io_png_read_pp_flt("-", &bx, &by);
+    __c = io_png_read_pp_flt("-", &bx, &cy);
+    __in = {
+    __a, __b, __c};
+    __out = malloc();
+    /* check the sizes */
+    /* load lambda(__in, __out, ax, ay); */
+    /* save the result */
+    io_png_write_flt("-", out, &ax, &ay, 3);
 
     return EXIT_SUCCESS;
 }
