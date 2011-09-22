@@ -28,8 +28,8 @@ static void __lambda(float * const *__in, float *__out,
 #define J (__n / __nx % __ny)
 #define K (__n / __nx / __ny)
 
-#define R2 ((I - NX / 2.) * (I - NX / 2.)       \
-            + (J - NY / 2.) * (J - NY / 2.))
+#define R2 ((I / (float) NX - .5) * (I / (float) NX - .5) \
+	    + (J / (float) NY - .5) * (J / (float) NY - .5))
 #define T (atan())
 
 #if (__NBINPUT >= 1)

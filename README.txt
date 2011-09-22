@@ -55,7 +55,7 @@ the I and J macros, in [0,NX[ ans [0,NY[. The current channel is K in
 
 Some other convenience macros are available:
 - N  number of pixels in the image
-- R2 square distance to the center of the image
+- R2 square normalized distance to the center of the image
 - T  angle from the center of the image
 
 For ecery image, some pixel position modifiers are available:
@@ -76,7 +76,7 @@ Sum two images:
 
 Add a gaussian to half of lena:
 
-  cclambda lena.png "(A / 2) + exp(-40. * R2)" > out.png
+  cclambda lena.png "(A / 2) + exp(-40. * sqrt(R2))" > out.png
 
 Forward differences to compute the derivative in horizontal direction:
 
@@ -107,6 +107,12 @@ Swap the red an green channels of a RGB image:
     cclambda - "(K == 2 ? A0 : A)" < lena.png ) \
     | cclambda - - "(K == 0 ? A : B)" > lena_bgr.png
 
+Display the three RGB channels:
+
+  ./cclambda - "(K == 0 ? A : 0)" < data/lena.png | display
+  ./cclambda - "(K == 1 ? A : 0)" < data/lena.png | display
+  ./cclambda - "(K == 2 ? A : 0)" < data/lena.png | display
+
 # REQUIREMENTS
 
 A C compiler is needed. tcc is a good choice because it is light and
@@ -131,3 +137,5 @@ implementation:
 - compile in-memory with libtcc
 - run the compiled function
 - libpng and libtcc can be embedded in a static build
+
+Compare speed with plambda.
