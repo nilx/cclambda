@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# tcc is a fast compiler
+which tcc > /dev/null && CC=tcc || CC=cc
+
+if [ $# -lt 2 ]; then
+    echo 'syntax: $0 img1.png img2.png ... "espression"'
+    echo '        between 1 and 4 input images'
+    echo '        "-" for std intput'
+    exit
+fi
+
+NBINPUT=$(($# - 1))
+INPUT=""
+for I in $( seq $NBINPUT); do
+    INPUT="$INPUT $1"
+    shift
+done
+LAMBDA="$1"
+
+$CC -D__NBINPUT=$NBINPUT -D__LAMBDA="$LAMBDA" cclambda.c io_png.c -lpng -o cclambda.run
+exec ./cclambda.run $INPUT
