@@ -1,7 +1,11 @@
 #!/bin/sh
 
 # tcc is a fast compiler
-which tcc > /dev/null && CC=tcc || CC=cc
+CC=cc
+which tcc > /dev/null && CC=tcc
+
+# sacrify a little compilation time for better performances
+CFLAGS="-O3"
 
 if [ $# -lt 2 ]; then
     echo 'syntax: $0 img1.png img2.png ... "espression"'
@@ -18,5 +22,9 @@ for I in $( seq $NBINPUT); do
 done
 LAMBDA="$1"
 
-$CC -D__NBINPUT=$NBINPUT -D__LAMBDA="$LAMBDA" cclambda.c io_png.c -lpng -o cclambda.run
+# debug option
+set -x
+
+$CC $CFLAGS -D__NBINPUT=$NBINPUT -D__LAMBDA="$LAMBDA" \
+    cclambda.c io_png.c -lpng -o cclambda.run
 exec ./cclambda.run $INPUT
