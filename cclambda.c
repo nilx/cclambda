@@ -35,17 +35,18 @@
 #include "__lambda.h"
 
 /** pointer to the compiled __lambda() function */
-static void (*__lambda)(float * const *__in, float *__out,
-			size_t __nx, size_t __ny);
+typedef void (*lambda_fp)(float * const *, float *, size_t, size_t);
 
 /** use the embedded libtcc compiler to build the lambda loop */
-void run_with_libtcc(const char* expr, int nbinput,
-		     float * const * in, float * out,
-		     size_t nx, size_t ny)
+static void run_with_libtcc(const char* expr, int nbinput,
+			    float * const * in, float * out,
+			    size_t nx, size_t ny)
 {
     TCCState *tcc;
     void *tccmem;
     char nb[2];
+    /* TODO: typedef */
+    void (*funcp)(float * const *, float *, size_t, size_t);
 
     strcpy(nb, (1 == nbinput ? "1" :
 		2 == nbinput ? "2" :
@@ -56,7 +57,7 @@ void run_with_libtcc(const char* expr, int nbinput,
     tcc_define_symbol(tcc, "__EXPR", expr);
     tcc_define_symbol(tcc, "__NBINPUT", nb);
     tcc_set_output_type(tcc, TCC_OUTPUT_MEMORY);
-    if (0 != tcc_compile_string(tcc, __lambda_c)) {
+    if (0 != tcc_compile_string(tcc, (const char *) __lambda_c)) {
 	fprintf(stderr, "compilation error\n");
 	exit(EXIT_FAILURE);
     }
@@ -66,12 +67,18 @@ void run_with_libtcc(const char* expr, int nbinput,
 	fprintf(stderr, "relocation error\n");
 	exit(EXIT_FAILURE);
     }
-    if (NULL == (__lambda = tcc_get_symbol(tcc, "__lambda"))) {
+    /*
+     * see the RATIONALE section of
+     * http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
+     */
+    funcp = (void (*)(float * const *, float *, size_t, size_t))
+	tcc_get_symbol(tcc, "__lambda");
+    if (NULL == funcp) {
 	fprintf(stderr, "missing symbol\n");
 	exit(EXIT_FAILURE);
     }
     /* run __lambda(in, out, nx, ny); */
-    (*__lambda)(in, out, nx, ny);
+    (*funcp)(in, out, nx, ny);
     /* cleanup */
     tcc_delete(tcc);
     free(tccmem);
@@ -89,7 +96,7 @@ int main(int argc, char **argv)
     size_t _nx, _ny;
     size_t nx, ny;
     char * expr;
-    int nbinput;
+    size_t nbinput;
 
     /* validate params */
     nbinput = argc - 2;
