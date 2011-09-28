@@ -119,6 +119,9 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+    /* keep the compiler happy */
+    _nx = 0;
+    _ny = 0;
     /* read input images */
     for (i = 0; i < nbinput; i++) {
         in[i] =
