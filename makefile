@@ -1,4 +1,5 @@
-LDFLAGS	= -lpng -ltcc -ldl -lm
+#LDFLAGS	= -lpng -ltcc -ldl -lm
+LDFLAGS	= /usr/lib/libpng.a /usr/lib/libz.a /usr/lib/libtcc.a -ldl -lm
 
 default	: cclambda
 
