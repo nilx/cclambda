@@ -1,0 +1,6 @@
+/**
+ * @mainpage cclambda: C compiled lambda filter on images
+ *
+ * README.txt:
+ * @verbinclude README.txt
+ */
