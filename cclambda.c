@@ -34,22 +34,21 @@
 #include "__lambda.h"
 
 /** pointer to the compiled __lambda() function */
-typedef void (*lambda_fp)(float * const *, float *, size_t, size_t);
+typedef void (*lambda_fp) (float *const *, float *, size_t, size_t);
 
 /** use the embedded libtcc compiler to build the lambda loop */
-static void run_with_libtcc(const char* expr, int nbinput,
-			    float * const * in, float * out,
-			    size_t nx, size_t ny)
+static void run_with_libtcc(const char *expr, int nbinput,
+                            float *const *in, float *out,
+                            size_t nx, size_t ny)
 {
     TCCState *tcc;
     void *tccmem;
     char nb[2];
     /* TODO: typedef */
-    void (*funcp)(float * const *, float *, size_t, size_t);
+    void (*funcp) (float *const *, float *, size_t, size_t);
 
     strcpy(nb, (1 == nbinput ? "1" :
-		2 == nbinput ? "2" :
-		3 == nbinput ? "3" : "4"));
+                2 == nbinput ? "2" : 3 == nbinput ? "3" : "4"));
     /* compile lambda */
     tcc = tcc_new();
     tcc_set_warning(tcc, "all", 1);
@@ -57,27 +56,27 @@ static void run_with_libtcc(const char* expr, int nbinput,
     tcc_define_symbol(tcc, "__NBINPUT", nb);
     tcc_set_output_type(tcc, TCC_OUTPUT_MEMORY);
     if (0 != tcc_compile_string(tcc, (const char *) __lambda_c)) {
-	fprintf(stderr, "compilation error\n");
-	exit(EXIT_FAILURE);
+        fprintf(stderr, "compilation error\n");
+        exit(EXIT_FAILURE);
     }
     /* get the compiled symbols */
     tccmem = malloc((size_t) tcc_relocate(tcc, NULL));
     if (-1 == tcc_relocate(tcc, tccmem)) {
-	fprintf(stderr, "relocation error\n");
-	exit(EXIT_FAILURE);
+        fprintf(stderr, "relocation error\n");
+        exit(EXIT_FAILURE);
     }
     /*
      * see the RATIONALE section of
      * http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
      */
-    funcp = (void (*)(float * const *, float *, size_t, size_t))
-	tcc_get_symbol(tcc, "__lambda");
+    funcp = (void (*)(float *const *, float *, size_t, size_t))
+        tcc_get_symbol(tcc, "__lambda");
     if (NULL == funcp) {
-	fprintf(stderr, "missing symbol\n");
-	exit(EXIT_FAILURE);
+        fprintf(stderr, "missing symbol\n");
+        exit(EXIT_FAILURE);
     }
     /* run __lambda(in, out, nx, ny); */
-    (*funcp)(in, out, nx, ny);
+    (*funcp) (in, out, nx, ny);
     /* cleanup */
     tcc_delete(tcc);
     free(tccmem);
@@ -89,55 +88,57 @@ static void run_with_libtcc(const char* expr, int nbinput,
  */
 int main(int argc, char **argv)
 {
-    float * in[4];
-    float * out;
+    float *in[4];
+    float *out;
     size_t _nx, _ny;
     size_t nx, ny;
-    char * expr;
+    char *expr;
     int nbinput;
     int i;
 
     /* validate params */
     nbinput = argc - 2;
     if (nbinput < 1 || nbinput > 4) {
-	fprintf(stderr, "syntax:  %s img1.png img2.png ... 'espression'\n",
-		argv[0]);
-	fprintf(stderr, "         between 1 and 4 input images\n");
-	fprintf(stderr, "         '-' for stdin\n");
-	return EXIT_FAILURE;
+        fprintf(stderr, "syntax:  %s img1.png img2.png ... 'espression'\n",
+                argv[0]);
+        fprintf(stderr, "         between 1 and 4 input images\n");
+        fprintf(stderr, "         '-' for stdin\n");
+        return EXIT_FAILURE;
     }
-    expr = argv[argc-1];
+    expr = argv[argc - 1];
     if (NULL != strstr(expr, "__")) {
-	fprintf(stderr, "no '__' allowed in the C expression\n");
-	return EXIT_FAILURE;
+        fprintf(stderr, "no '__' allowed in the C expression\n");
+        return EXIT_FAILURE;
     }
     if (NULL != strchr(expr, ';')) {
-	fprintf(stderr, "no ';' allowed in the C expression\n");
-	return EXIT_FAILURE;
+        fprintf(stderr, "no ';' allowed in the C expression\n");
+        return EXIT_FAILURE;
     }
     if (NULL != strchr(expr, '"')) {
-	fprintf(stderr, "no '\"' allowed in the C expression\n");
-	return EXIT_FAILURE;
+        fprintf(stderr, "no '\"' allowed in the C expression\n");
+        return EXIT_FAILURE;
     }
 
     /* read input images */
     for (i = 0; i < nbinput; i++) {
-	in[i] = io_png_read_pp_flt(argv[i+1], &nx, &ny, NULL, IO_PNG_OPT_RGB);
-	if (0 == i) {
-	    /* store thje first size */
-	    _nx = nx;
-	    _ny = ny;
-	} else {
-	    /* check the size */
-	    if (nx != _nx || ny != _ny) {
-		fprintf(stderr, "input image sizes do not match\n");
-		return EXIT_FAILURE;
-	    }
-	}
+        in[i] =
+            io_png_read_pp_flt(argv[i + 1], &nx, &ny, NULL, IO_PNG_OPT_RGB);
+        if (0 == i) {
+            /* store thje first size */
+            _nx = nx;
+            _ny = ny;
+        }
+        else {
+            /* check the size */
+            if (nx != _nx || ny != _ny) {
+                fprintf(stderr, "input image sizes do not match\n");
+                return EXIT_FAILURE;
+            }
+        }
     }
     /* allocate output image */
     out = (float *) malloc(3 * nx * ny * sizeof(float));
-    
+
     /* compile and run the lambda loop */
     run_with_libtcc(expr, nbinput, in, out, nx, ny);
 
@@ -146,7 +147,7 @@ int main(int argc, char **argv)
 
     /* cleanup */
     for (i = 0; i < nbinput; i++)
-	free(in[i]);
+        free(in[i]);
     free(out);
 
     return EXIT_SUCCESS;
