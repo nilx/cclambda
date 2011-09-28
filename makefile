@@ -6,7 +6,7 @@
 # offered as-is, without any warranty.
 
 # source code, C language
-SRC	= cclambda.c io_png.c
+SRC	= cclambda.c cclambda_lib.c io_png.c
 # object files (partial compilation)
 OBJ	= $(SRC:.c=.o)
 # binary executable programs
@@ -41,13 +41,13 @@ cclambda.o	: cclambda.c __lambda.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 # final link
-cclambda	: cclambda.o io_png.o
+cclambda	: cclambda.o cclambda_lib.o io_png.o
 	$(CC) $^ $(LDFLAGS) -o $@
 
 # cleanup
 .PHONY	: clean distclean
 clean	:
-	$(RM) $(OBJ)
+	$(RM) $(OBJ) *.plist
 distclean	: clean
 	$(RM) $(BIN)
 	$(RM) -r srcdoc
