@@ -134,16 +134,7 @@ Display the three RGB channels:
 
 # TODO
 
-Add non-embedded compiler altenative:
-- cc = (getenv("CC") || "cc");
-- cflags = (getenv("CFLAGS") || " ");
-- tmpdir = mktemp()
-- save __lambda_c as tmpdir/lambda.c
-- cmd = "%s %s -shared -o %s/lambda.so %s/lambda.c" cc cflags tmpdir tmpdir
-- system(cmd)
-- hdl = dlopen(tmpdir/lambda.so)
-- lambda = dlsym(hdl, "__lambda")
-- (*lambda)(in, out, nx, ny)
+Add local compiler altenative
 Optional OpenMP support
 More macros
 Compare speed with plambda.
