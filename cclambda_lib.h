@@ -15,6 +15,10 @@
     exit(EXIT_FAILURE);         \
     } while (0);
 
+/* defined in __lambda.h */
+unsigned char __lambda_c[];
+unsigned int __lambda_c_len;
+
 /* cclambda_lib.c */
 void loop_with_libtcc(const char *expr, int nbinput, float *const *in, float *out, size_t nx, size_t ny);
 void loop_with_cc(const char *expr, int nbinput, float *const *in, float *out, size_t nx, size_t ny);

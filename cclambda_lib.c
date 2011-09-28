@@ -89,7 +89,7 @@ void loop_with_cc(const char *expr, int nbinput,
     char *cc, *cflags;
     char cflags_empty[] = "";
     char fname_src[L_tmpnam + 2], fname_obj[L_tmpnam + 3];
-    FILE *file_src;
+    FILE *fd;
     char cmd[512];
     void *dl;
     lambda_fp funcp;
@@ -105,10 +105,9 @@ void loop_with_cc(const char *expr, int nbinput,
     /* TODO: use mkstemp */
     (void) tmpnam(fname_src);
     strcat(fname_src, ".c");
-    file_src = fopen(fname_src, "w");
-    (void) fwrite((void *) __lambda_c,
-                  sizeof(char), __lambda_c_len, file_src);
-    fclose(file_src);
+    fd = fopen(fname_src, fname_src);
+    (void) fwrite((void *) __lambda_c, sizeof(char), __lambda_c_len, fd);
+    fclose(fd);
     /* build the command line */
     (void) tmpnam(fname_obj);
     strcat(fname_obj, ".so");

@@ -30,6 +30,15 @@
 #include "io_png.h"
 #include "cclambda_lib.h"
 
+#define USAGE \
+    "syntax: cclambda [-c|-h]\n"                                \
+    "        cclambda img1.png img2.png ... 'expr'\n"           \
+    "\n"                                                        \
+    "        -c       dump loop code\n"                         \
+    "        -h       this help\n"                              \
+    "        imgN.png 1 to 4 input files\n"                     \
+    "                 '-' for stdin\n"
+
 /**
  * command-line handler
  */
@@ -44,11 +53,23 @@ int main(int argc, char **argv)
     int i;
 
     /* validate params */
+    if (argc == 2) {
+        if (0 == strcmp(argv[1], "-c")) {
+            (void) fwrite((void *) __lambda_c, sizeof(char), __lambda_c_len,
+                          stdout);
+            exit(EXIT_SUCCESS);
+        }
+        else if (0 == strcmp(argv[1], "-h")) {
+            fprintf(stdout, USAGE);
+            exit(EXIT_SUCCESS);
+        }
+    }
     nbinput = argc - 2;
-    if (nbinput < 1 || nbinput > 4)
-        ERROR("syntax:  cclambda img1.png img2.png ... 'espression'\n"
-              "         between 1 and 4 input images\n"
-              "         '-' for stdin");
+    if (nbinput < 1 || nbinput > 4) {
+        fprintf(stderr, USAGE);
+        exit(EXIT_FAILURE);
+    }
+
     expr = argv[argc - 1];
     if (NULL != strstr(expr, "__")
         || NULL != strchr(expr, ';')
