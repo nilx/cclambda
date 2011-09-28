@@ -7,8 +7,6 @@
 
 # source code, C language
 SRC	= cclambda.c io_png.c
-# header-only code
-HDR	= __lambda.h
 # object files (partial compilation)
 OBJ	= $(SRC:.c=.o)
 # binary executable programs
@@ -50,7 +48,7 @@ cclambda	: cclambda.o io_png.o
 clean	:
 	$(RM) $(OBJ)
 distclean	: clean
-	$(RM) $(BIN) $(HDR)
+	$(RM) $(BIN) __lambda.h
 
 ################################################
 # extra tasks
@@ -61,10 +59,10 @@ RELEASE_TAG   = 0.$(DATE)
 
 .PHONY	: srcdoc lint beautify debug test release
 # source documentation
-srcdoc	: $(SRC) $(HDR)
+srcdoc	: $(SRC) __lambda.c __lambda.h
 	doxygen doc/doxygen.conf
 # code cleanup
-beautify	: $(SRC) $(HDR)
+beautify	: $(SRC) __lambda.c
 	for FILE in $^; do \
 		expand $$FILE | sed 's/[ \t]*$$//' > $$FILE.$$$$ \
 		&& indent -kr -i4 -l78 -nut -nce -sob -sc \
@@ -72,11 +70,15 @@ beautify	: $(SRC) $(HDR)
 		&& rm $$FILE.$$$$; \
 	done
 # static code analysis
-lint	: $(SRC)
+lint	: $(SRC) __lambda.c
 	for FILE in $^; do \
-		clang --analyze -ansi -DNDEBUG -I. $$FILE || exit 1; done;
+		clang --analyze -ansi \
+			-DNDEBUG -D__NBINPUT=4 -D__EXPR=A+B+C+D \
+			-I. $$FILE || exit 1; done;
 	for FILE in $^; do \
-		splint -ansi-lib -weak -DNDEBUG -I. $$FILE || exit 1; done;
+		splint -ansi-lib -weak -castfcnptr \
+			-DNDEBUG -D__NBINPUT=4 -D__EXPR=A+B+C+D \
+			-I. $$FILE || exit 1; done;
 	$(RM) *.plist
 # debug build
 debug	: $(SRC)

@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 
 #include "io_png.h"
 #include "libtcc.h"
@@ -62,7 +61,7 @@ static void run_with_libtcc(const char* expr, int nbinput,
 	exit(EXIT_FAILURE);
     }
     /* get the compiled symbols */
-    tccmem = malloc(tcc_relocate(tcc, NULL));
+    tccmem = malloc((size_t) tcc_relocate(tcc, NULL));
     if (-1 == tcc_relocate(tcc, tccmem)) {
 	fprintf(stderr, "relocation error\n");
 	exit(EXIT_FAILURE);
@@ -92,11 +91,11 @@ int main(int argc, char **argv)
 {
     float * in[4];
     float * out;
-    size_t i;
     size_t _nx, _ny;
     size_t nx, ny;
     char * expr;
-    size_t nbinput;
+    int nbinput;
+    int i;
 
     /* validate params */
     nbinput = argc - 2;
@@ -109,15 +108,15 @@ int main(int argc, char **argv)
     }
     expr = argv[argc-1];
     if (NULL != strstr(expr, "__")) {
-	fprintf(stderr, "no '__' allowed in the C expression");
+	fprintf(stderr, "no '__' allowed in the C expression\n");
 	return EXIT_FAILURE;
     }
     if (NULL != strchr(expr, ';')) {
-	fprintf(stderr, "no ';' allowed in the C expression");
+	fprintf(stderr, "no ';' allowed in the C expression\n");
 	return EXIT_FAILURE;
     }
     if (NULL != strchr(expr, '"')) {
-	fprintf(stderr, "no '\"' allowed in the C expression");
+	fprintf(stderr, "no '\"' allowed in the C expression\n");
 	return EXIT_FAILURE;
     }
 
@@ -130,7 +129,10 @@ int main(int argc, char **argv)
 	    _ny = ny;
 	} else {
 	    /* check the size */
-	    assert(nx == _nx && ny == _ny);
+	    if (nx != _nx || ny != _ny) {
+		fprintf(stderr, "input image sizes do not match\n");
+		return EXIT_FAILURE;
+	    }
 	}
     }
     /* allocate output image */
