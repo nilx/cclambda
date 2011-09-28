@@ -28,14 +28,11 @@ the usefullness of cclambda and the interest of the author.
 
 # REQUIREMENTS
 
-build requirements:
+
 - a C compiler to build cclambda
 - xxd to format __lambda.h
 - libtcc for dynamic run-time compilation
 - libpng+zlib to read and write PNG images
-
-run-time requirements:
-- none (default compilation is static)
 
 # FILES
 
@@ -45,10 +42,8 @@ run-time requirements:
 
 # COMPILATION
 
-Use the makefile.
-
-  make
-  make clean
+Use the makefile, with `make`. You can embed libpng and libtcc in
+cclambda by a static build with `make STATIC=1`.
 
 # SYNTAX
 

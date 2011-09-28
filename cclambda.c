@@ -22,19 +22,35 @@
  * @todo: multiple io formats
  * @todo: external compilers
  * @todo: optional libtcc
+ * @todo: dump __lambda_c
  */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
+#include <libtcc.h>
+
 #include "io_png.h"
-#include "libtcc.h"
 
 #include "__lambda.h"
 
 /** pointer to the compiled __lambda() function */
 typedef void (*lambda_fp) (float *const *, float *, size_t, size_t);
+
+/** abort() wrapper macro with an error message */
+#define ABORT(MSG) do {                                         \
+    fprintf(stderr, "%s:%04u : %s\n", __FILE__, __LINE__, MSG); \
+    fflush(NULL);                                               \
+    abort();                                                    \
+    } while (0);
+
+/** exit() wrapper macro with an error message */
+#define ERROR(MSG) do {         \
+    fprintf(stderr, MSG);       \
+    fflush(NULL);               \
+    exit(EXIT_FAILURE);         \
+    } while (0);
 
 /** use the embedded libtcc compiler to build the lambda loop */
 static void run_with_libtcc(const char *expr, int nbinput,
@@ -55,26 +71,22 @@ static void run_with_libtcc(const char *expr, int nbinput,
     tcc_define_symbol(tcc, "__EXPR", expr);
     tcc_define_symbol(tcc, "__NBINPUT", nb);
     tcc_set_output_type(tcc, TCC_OUTPUT_MEMORY);
-    if (0 != tcc_compile_string(tcc, (const char *) __lambda_c)) {
-        fprintf(stderr, "compilation error\n");
-        exit(EXIT_FAILURE);
-    }
+    if (0 != tcc_compile_string(tcc, (const char *) __lambda_c))
+        ABORT("compilation error");
     /* get the compiled symbols */
     tccmem = malloc((size_t) tcc_relocate(tcc, NULL));
-    if (-1 == tcc_relocate(tcc, tccmem)) {
-        fprintf(stderr, "relocation error\n");
-        exit(EXIT_FAILURE);
-    }
+    if (NULL == tccmem)
+        ABORT("relocation error");
+    if (-1 == tcc_relocate(tcc, tccmem))
+        ABORT("relocation error");
     /*
      * see the RATIONALE section of
      * http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
      */
     funcp = (void (*)(float *const *, float *, size_t, size_t))
         tcc_get_symbol(tcc, "__lambda");
-    if (NULL == funcp) {
-        fprintf(stderr, "missing symbol\n");
-        exit(EXIT_FAILURE);
-    }
+    if (NULL == funcp)
+        ABORT("missing __lambda symbol");
     /* run __lambda(in, out, nx, ny); */
     (*funcp) (in, out, nx, ny);
     /* cleanup */
@@ -98,26 +110,15 @@ int main(int argc, char **argv)
 
     /* validate params */
     nbinput = argc - 2;
-    if (nbinput < 1 || nbinput > 4) {
-        fprintf(stderr, "syntax:  %s img1.png img2.png ... 'espression'\n",
-                argv[0]);
-        fprintf(stderr, "         between 1 and 4 input images\n");
-        fprintf(stderr, "         '-' for stdin\n");
-        return EXIT_FAILURE;
-    }
+    if (nbinput < 1 || nbinput > 4)
+        ERROR("syntax:  cclambda img1.png img2.png ... 'espression'\n"
+              "         between 1 and 4 input images\n"
+              "         '-' for stdin");
     expr = argv[argc - 1];
-    if (NULL != strstr(expr, "__")) {
-        fprintf(stderr, "no '__' allowed in the C expression\n");
-        return EXIT_FAILURE;
-    }
-    if (NULL != strchr(expr, ';')) {
-        fprintf(stderr, "no ';' allowed in the C expression\n");
-        return EXIT_FAILURE;
-    }
-    if (NULL != strchr(expr, '"')) {
-        fprintf(stderr, "no '\"' allowed in the C expression\n");
-        return EXIT_FAILURE;
-    }
+    if (NULL != strstr(expr, "__")
+        || NULL != strchr(expr, ';')
+        || NULL != strchr(expr, '"'))
+        ERROR("no '__', ';' or '\"' allowed in the C expression");
 
     /* keep the compiler happy */
     _nx = 0;
