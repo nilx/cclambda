@@ -46,9 +46,9 @@ cclambda	: cclambda.o io_png.o
 # cleanup
 .PHONY	: clean distclean
 clean	:
-	$(RM) $(OBJ)
+	$(RM) $(OBJ) __lambda.h
 distclean	: clean
-	$(RM) $(BIN) __lambda.h
+	$(RM) $(BIN)
 
 ################################################
 # extra tasks
