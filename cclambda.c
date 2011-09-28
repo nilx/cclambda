@@ -79,7 +79,6 @@ int main(int argc, char **argv)
     /* run __lambda(in, out, nx, ny); */
     (*__lambda)(in, out, nx, ny);
 
-
     tcc_delete(tcc);
     free(tccmem);
 

@@ -3,7 +3,7 @@
 # USAGE
 
   ./cclambda a.png b.png "expression" > out.png
-  cat a.png b.png | ./cclambda.sh - - "expression" > out.png
+  cat a.png b.png | ./cclambda - - "expression" > out.png
 
 # DESCRIPTION
 
@@ -25,6 +25,30 @@ of bugs. Further development may or may not improve it, depending on
 the usefullness of cclambda and the interest of the author.
 
 [1] http://dev.ipol.im/git/?p=coco/imscript.git
+
+# REQUIREMENTS
+
+build requirements:
+- a C compiler to build cclambda
+- xxd to format __lambda.h
+- libtcc for dynamic run-time compilation
+- libpng+zlib to read and write PNG images
+
+run-time requirements:
+- none (default compilation is static)
+
+# FILES
+
+- cclambda.c   main code
+- __lambda.c   dynamically compiled code template
+- io_png.{c,h} libpng wrapper
+
+# COMPILATION
+
+Use the makefile.
+
+  make
+  make clean
 
 # SYNTAX
 
@@ -113,29 +137,12 @@ Display the three RGB channels:
   ./cclambda - "(K == 1 ? A : 0)" < data/lena.png | display
   ./cclambda - "(K == 2 ? A : 0)" < data/lena.png | display
 
-# REQUIREMENTS
-
-A C compiler is needed. tcc is a good choice because it is light and
-fast. If tcc is not available, the default C compiler (cc) wiill be
-used.
-
-You also need libpng (binary and headers).
-
-# FILES
-
-- cclambda     shell wrapper
-- cclambda.c   lambda template
-- io_png.{c,h} libpng wrapper
-
 # TODO
 
-Detect and filter "__" and ";" in the expression.
-
-Replace the shell+cc prototype by a full compiled C stand-alone
-implementation:
-- generate the cclambda.c code as a string
-- compile in-memory with libtcc
-- run the compiled function
-- libpng and libtcc can be embedded in a static build
-
+Add non-embedded compiler altenative:
+- save __lambda_c as a tmp file
+- system("cc -c -Ox -o __lambda.o ")
+- dlopen()
+Optional OpenMP support
+More macros
 Compare speed with plambda.
