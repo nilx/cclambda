@@ -50,6 +50,7 @@ clean	:
 	$(RM) $(OBJ) __lambda.h
 distclean	: clean
 	$(RM) $(BIN)
+	$(RM) -r srcdoc
 
 ################################################
 # extra tasks
