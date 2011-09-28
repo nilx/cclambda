@@ -1,5 +1,10 @@
-/*
- * compile with cc -c -D__NBINPUT=N -D__EXPR="..."
+/**
+ * @file __lambda.c
+ * @brief lambda loop code template
+ *
+ * some macros must be defined at compile time:
+ *   __NBINPUT
+ *   __EXPR
  */
 
 #include <stdlib.h>

@@ -64,8 +64,7 @@ static void run_with_libtcc(const char *expr, int nbinput,
     TCCState *tcc;
     void *tccmem;
     char nb[2];
-    /* TODO: typedef */
-    void (*funcp) (float *const *, float *, size_t, size_t);
+    lambda_fp funcp;
 
     strcpy(nb, (1 == nbinput ? "1" :
                 2 == nbinput ? "2" : 3 == nbinput ? "3" : "4"));
@@ -87,8 +86,7 @@ static void run_with_libtcc(const char *expr, int nbinput,
      * see the RATIONALE section of
      * http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
      */
-    funcp = (void (*)(float *const *, float *, size_t, size_t))
-        tcc_get_symbol(tcc, "__lambda");
+    funcp = (lambda_fp) tcc_get_symbol(tcc, "__lambda");
     if (NULL == funcp)
         ABORT("missing __lambda symbol");
     /* run __lambda(in, out, nx, ny); */
@@ -115,8 +113,7 @@ static void run_with_cc(const char *expr, int nbinput,
     FILE *file_src;
     char cmd[512];
     void *dl;
-    /* TODO: typedef */
-    void (*funcp) (float *const *, float *, size_t, size_t);
+    lambda_fp funcp;
 
     /* gather local settings */
     cc = getenv("CC");
@@ -149,8 +146,7 @@ static void run_with_cc(const char *expr, int nbinput,
      * see the RATIONALE section of
      * http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
      */
-    funcp = (void (*)(float *const *, float *, size_t, size_t))
-        dlsym(dl, "__lambda");
+    funcp = (lambda_fp) dlsym(dl, "__lambda");
     if (NULL == funcp)
         ABORT("missing __lambda symbol");
     /* run __lambda(in, out, nx, ny); */

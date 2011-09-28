@@ -47,7 +47,7 @@ cclambda	: cclambda.o io_png.o
 # cleanup
 .PHONY	: clean distclean
 clean	:
-	$(RM) $(OBJ) __lambda.h
+	$(RM) $(OBJ)
 distclean	: clean
 	$(RM) $(BIN)
 	$(RM) -r srcdoc
@@ -71,6 +71,7 @@ beautify	: $(SRC) __lambda.c
 			$$FILE.$$$$ -o $$FILE \
 		&& rm $$FILE.$$$$; \
 	done
+	$(MAKE) __lambda.h
 # static code analysis
 lint	: $(SRC) __lambda.c
 	for FILE in $^; do \
