@@ -30,7 +30,8 @@ default: $(BIN)
 
 # __lambda.h formatting
 __lambda.h	: __lambda.c
-	xxd -i $< > $@
+	echo "/* xxd -i $< */" > $@
+	xxd -i $< >> $@
 
 # dependencies
 cclambda.o	: cclambda.c __lambda.h
