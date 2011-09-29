@@ -20,8 +20,6 @@
  * @author Nicolas Limare <nicolas.limare@cmla.ens-cachan.fr>
  *
  * @todo: multiple io formats
- * @todo: optional libtcc
- * @todo: dump __lambda_c
  */
 
 #include <stdlib.h>
@@ -30,14 +28,29 @@
 #include "io_png.h"
 #include "cclambda_lib.h"
 
+#ifdef STATIC
+#define STATIC_STR ", static build"
+#else
+#define STATIC_STR ""
+#endif
+
+#ifdef WITHOUT_LIBTCC
+#define LIBTCC_STR ", without libtcc"
+#else
+#define LIBTCC_STR ", with libtcc"
+#endif
+
 #define USAGE \
-    "syntax: cclambda [-c|-h]\n"                                \
-    "        cclambda img1.png img2.png ... 'expr'\n"           \
-    "\n"                                                        \
-    "        -c       dump loop code\n"                         \
-    "        -h       this help\n"                              \
-    "        imgN.png 1 to 4 input files\n"                     \
-    "                 '-' for stdin\n"                          \
+    "cclambda, compiled " __DATE__ STATIC_STR LIBTCC_STR "\n"           \
+    "\n"                                                                \
+    "syntax: cclambda [-c|-h]\n"                                        \
+    "        cclambda img1.png img2.png ... 'expr'\n"                   \
+    "        CC=cc CFLAGS=-O3 cclambda img1.png img2.png ... 'expr'\n"  \
+    "\n"                                                                \
+    "        -c       dump loop code\n"                                 \
+    "        -h       this help\n"                                      \
+    "        imgN.png 1 to 4 input files\n"                             \
+    "                 '-' for stdin\n"                                  \
     "        no '__', ';' or '\'' allowed in expr\n"
 
 /**
@@ -103,12 +116,16 @@ int main(int argc, char **argv)
     out = (float *) malloc(3 * nx * ny * sizeof(float));
 
     /* compile and run the lambda loop */
+#ifdef WITHOUT_LIBTCC
+    loop_with_cc(expr, nbinput, in, out, nx, ny);
+#else
     if (NULL == getenv("CC"))
         /* no CC, use libtcc */
         loop_with_libtcc(expr, nbinput, in, out, nx, ny);
     else
         /* use local CC */
         loop_with_cc(expr, nbinput, in, out, nx, ny);
+#endif
 
     /* write output images */
     io_png_write_flt("-", out, nx, ny, 3);

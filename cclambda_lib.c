@@ -21,7 +21,6 @@
  *
  * @todo: use safe POSIX functions (execvp, snprintf, mkstemp, ...)
  * @todo: pass image size as cpp macro for unrolled loops
- * @todo: optional libtcc
  */
 
 #include <stdlib.h>
@@ -29,7 +28,11 @@
 #include <stdio.h>
 
 #include <dlfcn.h>
+
+#ifndef WITHOUT_LIBTCC
 #include <libtcc.h>
+#endif
+
 #include "__lambda.h"           /* __lambda_c and __lambda_c_len */
 
 /* ensure consistency */
@@ -38,6 +41,7 @@
 /** pointer to the compiled __lambda() function */
 typedef void (*lambda_fp) (float *const *, float *);
 
+#ifndef WITHOUT_LIBTCC
 /**
  * use the embedded libtcc compiler to build the lambda loop
  */
@@ -87,6 +91,7 @@ void loop_with_libtcc(const char *expr, int nbinput,
     free(tccmem);
     return;
 }
+#endif                          /* WITH_LIBTCC */
 
 /**
  * use the local CC compiler to build the lambda loop

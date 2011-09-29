@@ -13,7 +13,7 @@ OBJ	= $(SRC:.c=.o)
 BIN	= cclambda
 
 # standard C compiler optimization options
-COPT	= -O3 -DNDEBUG -funroll-loops -fomit-frame-pointer
+COPT	= -O3 -DNDEBUG -funroll-loops
 # complete C compiler options
 CFLAGS	= -ansi -pedantic -Wall -Wextra -pipe $(COPT)
 # linker options
@@ -23,6 +23,7 @@ LDFLAGS	+= -lpng -ltcc -ldl -lm
 ifdef STATIC
 # link options to use the local libraries
 LDFLAGS	= /usr/lib/libpng.a /usr/lib/libz.a /usr/lib/libtcc.a -ldl -lm
+CFLAGS	:= $(CFLAGS) -DSTATIC
 endif
 
 # default target: the binary executable programs

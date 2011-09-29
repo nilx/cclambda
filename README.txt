@@ -30,7 +30,8 @@ the usefullness of cclambda and the interest of the author.
 
 - a POSIX system (dlopen() is used)
 - a C compiler to build cclambda
-- libtcc for dynamic run-time compilation
+- libtcc for dynamic run-time compilation,
+  if WITHOUT_LIBTCC is not defined at compile time
 - libpng+zlib to read and write PNG images
 
 # FILES
