@@ -36,7 +36,7 @@
 #include "cclambda_lib.h"
 
 /** pointer to the compiled __lambda() function */
-typedef void (*lambda_fp) (float *const *, float *, size_t, size_t);
+typedef void (*lambda_fp) (float *const *, float *);
 
 /**
  * use the embedded libtcc compiler to build the lambda loop
@@ -46,16 +46,24 @@ void loop_with_libtcc(const char *expr, int nbinput,
 {
     TCCState *tcc;
     void *tccmem;
-    char nb[2];
+    char nbinput_s[16], nx_s[16], ny_s[16];
     lambda_fp funcp;
 
-    strcpy(nb, (1 == nbinput ? "1" :
-                2 == nbinput ? "2" : 3 == nbinput ? "3" : "4"));
+    DBG_PRINTF0("compile with embedded libtcc\n");
+    sprintf(nbinput_s, "%i", nbinput);
+    sprintf(nx_s, "%lu", nx);
+    sprintf(ny_s, "%lu", ny);
     /* compile lambda */
     tcc = tcc_new();
     tcc_set_warning(tcc, "all", 1);
     tcc_define_symbol(tcc, "__EXPR", expr);
-    tcc_define_symbol(tcc, "__NBINPUT", nb);
+    tcc_define_symbol(tcc, "__NBINPUT", nbinput_s);
+    tcc_define_symbol(tcc, "__NX", nx_s);
+    tcc_define_symbol(tcc, "__NY", ny_s);
+    DBG_PRINTF1("__EXPR\t'%s'\n", expr);
+    DBG_PRINTF1("__NBINPUT\t'%s'\n", nbinput_s);
+    DBG_PRINTF1("__NX\t'%s'\n", nx_s);
+    DBG_PRINTF1("__NY\t'%s'\n", ny_s);
     tcc_set_output_type(tcc, TCC_OUTPUT_MEMORY);
     if (0 != tcc_compile_string(tcc, (const char *) __lambda_c))
         ABORT("compilation error");
@@ -72,8 +80,8 @@ void loop_with_libtcc(const char *expr, int nbinput,
     funcp = (lambda_fp) tcc_get_symbol(tcc, "__lambda");
     if (NULL == funcp)
         ABORT("missing __lambda symbol");
-    /* run __lambda(in, out, nx, ny); */
-    (*funcp) (in, out, nx, ny);
+    /* run __lambda(in, out); */
+    (*funcp) (in, out);
     /* cleanup */
     tcc_delete(tcc);
     free(tccmem);
@@ -94,6 +102,7 @@ void loop_with_cc(const char *expr, int nbinput,
     void *dl;
     lambda_fp funcp;
 
+    DBG_PRINTF0("compile with external compiler\n");
     /* gather local settings */
     cc = getenv("CC");
     if (NULL == cc)
@@ -101,19 +110,25 @@ void loop_with_cc(const char *expr, int nbinput,
     cflags = getenv("CFLAGS");
     if (NULL == cflags)
         cflags = cflags_empty;
+    DBG_PRINTF1("CC\t'%s'\n", cc);
+    DBG_PRINTF1("CFLAGS\t'%s'\n", cflags);
     /* temporary source file */
     /* TODO: use mkstemp */
     (void) tmpnam(fname_src);
     strcat(fname_src, ".c");
-    fd = fopen(fname_src, fname_src);
+    fd = fopen(fname_src, "w");
     (void) fwrite((void *) __lambda_c, sizeof(char), __lambda_c_len, fd);
     fclose(fd);
     /* build the command line */
     (void) tmpnam(fname_obj);
     strcat(fname_obj, ".so");
-    /* TODO: use snprintf() or check the length */
-    sprintf(cmd, "%s %s -D__EXPR=\"%s\" -D__NBINPUT=%i -shared -o %s %s",
-            cc, cflags, expr, nbinput, fname_obj, fname_src);
+    /* TODO: use snprintf() */
+    /* TODO: insert -g in debug mode */
+    /* TODO: insert warnings */
+    sprintf(cmd, "%s %s -D__EXPR='%s' -D__NBINPUT=%i -D__NX=%lu -D__NY=%lu "
+            "-shared -o %s %s",
+            cc, cflags, expr, nbinput, nx, ny, fname_obj, fname_src);
+    DBG_PRINTF1("cmd\t'%s'\n", cmd);
     /* compile */
     if (0 == system(NULL))
         ABORT("no command processor");
@@ -127,8 +142,8 @@ void loop_with_cc(const char *expr, int nbinput,
     funcp = (lambda_fp) dlsym(dl, "__lambda");
     if (NULL == funcp)
         ABORT("missing __lambda symbol");
-    /* run __lambda(in, out, nx, ny); */
-    (*funcp) (in, out, nx, ny);
+    /* run __lambda(in, out); */
+    (*funcp) (in, out);
     /* cleanup */
     dlclose(dl);
     remove(fname_obj);

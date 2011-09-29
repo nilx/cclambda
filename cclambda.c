@@ -37,7 +37,8 @@
     "        -c       dump loop code\n"                         \
     "        -h       this help\n"                              \
     "        imgN.png 1 to 4 input files\n"                     \
-    "                 '-' for stdin\n"
+    "                 '-' for stdin\n"                          \
+    "        no '__', ';' or '\'' allowed expr"
 
 /**
  * command-line handler
@@ -73,8 +74,10 @@ int main(int argc, char **argv)
     expr = argv[argc - 1];
     if (NULL != strstr(expr, "__")
         || NULL != strchr(expr, ';')
-        || NULL != strchr(expr, '"'))
-        ERROR("no '__', ';' or '\"' allowed in the C expression");
+        || NULL != strchr(expr, '\'')) {
+        fprintf(stderr, USAGE);
+        exit(EXIT_FAILURE);
+    }
 
     /* keep the compiler happy */
     _nx = 0;
