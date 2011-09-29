@@ -33,7 +33,6 @@
 #else
 int mkstemp(const char *);
 FILE *fdopen(int, const char *);
-int close(int);
 #endif
 
 #include <dlfcn.h>              /* dlopen() */
@@ -110,10 +109,9 @@ void loop_with_cc(const char *expr, int nbinput,
 {
     char *cc, *cflags, *cflags_dbg = NULL;
     char cflags_empty[] = "";
-    char fname_src_tmpl[] = "/tmp/cclambda_src_XXXXXX";
-    char fname_obj_tmpl[] = "/tmp/cclambda_obj_XXXXXX";
-    char fname_src[] = "/tmp/cclambda_src_XXXXXX.c";
-    char fname_obj[] = "/tmp/cclambda_obj_XXXXXX.so";
+    char fname_tmpl[] = "/tmp/cclambda_XXXXXX";
+    char fname_src[] = "/tmp/cclambda_XXXXXX.c";
+    char fname_obj[] = "/tmp/cclambda_XXXXXX.so";
     FILE *fd;
     char cmd[512];
     void *dl;
@@ -137,21 +135,19 @@ void loop_with_cc(const char *expr, int nbinput,
     DBG_PRINTF1("CC\t'%s'\n", cc);
     DBG_PRINTF1("CFLAGS\t'%s'\n", cflags);
     /* temporary source and object files */
-    fd = fdopen(mkstemp(fname_src_tmpl), "w");
+    fd = fdopen(mkstemp(fname_tmpl), "w");
     (void) fwrite((void *) __lambda_c, sizeof(char), __lambda_c_len, fd);
     fclose(fd);
-    close(mkstemp(fname_obj_tmpl));
     /* add suffix for compiler comfort */
-    strcpy(fname_src, fname_src_tmpl);
+    strcpy(fname_src, fname_tmpl);
     strcat(fname_src, ".c");
-    rename(fname_src_tmpl, fname_src);
-    strcpy(fname_obj, fname_obj_tmpl);
+    rename(fname_tmpl, fname_src);
+    strcpy(fname_obj, fname_tmpl);
     strcat(fname_obj, ".so");
-    rename(fname_obj_tmpl, fname_obj);
     /* TODO: insert warnings */
     snprintf(cmd, 512, "%s %s "
              "-D__EXPR='%s' -D__NBINPUT=%i -D__NX=%lu -D__NY=%lu "
-             "-shared -o %s %s",
+             "-shared -fPIC -o %s %s",
              cc, cflags, expr, nbinput, nx, ny, fname_obj, fname_src);
     DBG_PRINTF1("cmd\t'%s'\n", cmd);
     /* compile */

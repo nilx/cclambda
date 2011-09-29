@@ -3,7 +3,7 @@
 # SYNOPSIS
 
   ./cclambda a.png b.png "expression" > out.png
-  CC=gcc CFLAGS="-O3 -funroll-loops" ./cclambda a.png b.png "expression" > out.png
+  CC=gcc CFLAGS="-O3 -funroll-loops" ./cclambda a.png b.png "expr" > out.png
 
 # DESCRIPTION
 
@@ -64,6 +64,9 @@ external compiler and the compiling flags in the CC and CFLAGS
 environment variables:
 
     CC=gcc CFLAGS="-O3 -funroll-loops" ./cclambda a.png b.png "expression" > out.png
+
+cclambda has been tested and works with gcc, tcc, nwcc, pathcc and
+suncc. It currently fails with icc.
 
 # EXPRESSION SYNTAX
 
@@ -154,6 +157,7 @@ Display the three RGB channels:
 
 # TODO
 
+Automated test suite
 Optional OpenMP support
 More macros
 Compare speed with plambda.
