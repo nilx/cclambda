@@ -63,10 +63,19 @@ images, you can benefit from compiler optimization by specifying an
 external compiler and the compiling flags in the CC and CFLAGS
 environment variables:
 
-    CC=gcc CFLAGS="-O3 -funroll-loops" ./cclambda a.png b.png "expression" > out.png
+    CC=gcc CFLAGS="-O3" ./cclambda a.png b.png "expression" > out.png
 
-cclambda has been tested and works with gcc, tcc, nwcc, pathcc and
-suncc. It currently fails with icc.
+When cclambda is compiled in debug mode (without the NDEBUG macro),
+the -g option is automatically added to the compiler flags.
+
+External compilation been tested on linux 2.6.32, amd64 architecture,
+with GNU ld 2.20.1 and the following compilers:
+- gcc    4.4.5
+- tcc    0.9.25
+- nwcc   0.8.1
+- pathcc 4.0.10
+- suncc  5.11
+- icc    12.0.4
 
 # EXPRESSION SYNTAX
 

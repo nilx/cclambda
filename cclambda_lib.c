@@ -109,9 +109,10 @@ void loop_with_cc(const char *expr, int nbinput,
 {
     char *cc, *cflags, *cflags_dbg = NULL;
     char cflags_empty[] = "";
-    char fname_tmpl[] = "/tmp/cclambda_XXXXXX";
-    char fname_src[] = "/tmp/cclambda_XXXXXX.c";
-    char fname_obj[] = "/tmp/cclambda_XXXXXX.so";
+    char fname[] = "/tmp/cclambda_XXXXXX";
+    char fname_c[] = "/tmp/cclambda_XXXXXX.c";
+    char fname_o[] = "/tmp/cclambda_XXXXXX.o";
+    char fname_so[] = "/tmp/cclambda_XXXXXX.so";
     FILE *fd;
     char cmd[512];
     void *dl;
@@ -135,27 +136,33 @@ void loop_with_cc(const char *expr, int nbinput,
     DBG_PRINTF1("CC\t'%s'\n", cc);
     DBG_PRINTF1("CFLAGS\t'%s'\n", cflags);
     /* temporary source and object files */
-    fd = fdopen(mkstemp(fname_tmpl), "w");
+    fd = fdopen(mkstemp(fname), "w");
     (void) fwrite((void *) __lambda_c, sizeof(char), __lambda_c_len, fd);
     fclose(fd);
     /* add suffix for compiler comfort */
-    strcpy(fname_src, fname_tmpl);
-    strcat(fname_src, ".c");
-    rename(fname_tmpl, fname_src);
-    strcpy(fname_obj, fname_tmpl);
-    strcat(fname_obj, ".so");
-    /* TODO: insert warnings */
-    snprintf(cmd, 512, "%s %s "
-             "-D__EXPR='%s' -D__NBINPUT=%i -D__NX=%lu -D__NY=%lu "
-             "-shared -fPIC -o %s %s",
-             cc, cflags, expr, nbinput, nx, ny, fname_obj, fname_src);
-    DBG_PRINTF1("cmd\t'%s'\n", cmd);
+    strcpy(fname_c, fname);
+    strcat(fname_c, ".c");
+    rename(fname, fname_c);
+    strcpy(fname_o, fname);
+    strcat(fname_o, ".o");
+    strcpy(fname_so, fname);
+    strcat(fname_so, ".so");
     /* compile */
+    /* TODO: insert warnings */
     if (0 == system(NULL))
         ABORT("no command processor");
+    snprintf(cmd, 512, "%s %s "
+             "-D__EXPR='%s' -D__NBINPUT=%i -D__NX=%lu -D__NY=%lu "
+             "-fPIC -c -o %s %s",
+             cc, cflags, expr, nbinput, nx, ny, fname_o, fname_c);
+    DBG_PRINTF1("cmd\t'%s'\n", cmd);
+    system(cmd);
+    /* link */
+    snprintf(cmd, 512, "ld -shared -o %s %s", fname_so, fname_o);
+    DBG_PRINTF1("cmd\t'%s'\n", cmd);
     system(cmd);
     /* dynamic load */
-    dl = dlopen(fname_obj, RTLD_NOW);
+    dl = dlopen(fname_so, RTLD_NOW);
     /*
      * see the RATIONALE section of
      * http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
@@ -167,8 +174,9 @@ void loop_with_cc(const char *expr, int nbinput,
     (*funcp) (in, out);
     /* cleanup */
     dlclose(dl);
-    remove(fname_obj);
-    remove(fname_src);
+    remove(fname_c);
+    remove(fname_o);
+    remove(fname_so);
     if (NULL != cflags_dbg)
         free(cflags_dbg);
     return;
