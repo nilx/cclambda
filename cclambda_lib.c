@@ -28,7 +28,12 @@
 #include <string.h>
 #include <stdio.h>
 
+#ifndef S_SPLINT_S              /* see http://bugs.debian.org/476228 */
 #include <unistd.h>
+#else
+int mkstemp(const char *);
+#endif
+
 #include <dlfcn.h>              /* dlopen() */
 
 #ifndef WITHOUT_LIBTCC
@@ -101,7 +106,7 @@ void loop_with_libtcc(const char *expr, int nbinput,
 void loop_with_cc(const char *expr, int nbinput,
                   float *const *in, float *out, size_t nx, size_t ny)
 {
-    char *cc, *cflags;
+    char *cc, *cflags, *cflags_dbg = NULL;
     char cflags_empty[] = "";
     char fname_src_tmpl[] = "/tmp/cclambda_src_XXXXXX";
     char fname_obj_tmpl[] = "/tmp/cclambda_obj_XXXXXX";
@@ -120,7 +125,13 @@ void loop_with_cc(const char *expr, int nbinput,
     cflags = getenv("CFLAGS");
     if (NULL == cflags)
         cflags = cflags_empty;
-    /* TODO: add -g in debug mode */
+#ifndef NDEBUG
+    /* add -g in debug mode */
+    cflags_dbg = (char *) malloc((strlen(cflags) + 3) * sizeof(char));
+    strcpy(cflags_dbg, cflags);
+    strcat(cflags_dbg, " -g");
+    cflags = cflags_dbg;
+#endif
     DBG_PRINTF1("CC\t'%s'\n", cc);
     DBG_PRINTF1("CFLAGS\t'%s'\n", cflags);
     /* temporary source and object files */
@@ -161,5 +172,7 @@ void loop_with_cc(const char *expr, int nbinput,
     dlclose(dl);
     remove(fname_obj);
     remove(fname_src);
+    if (NULL != cflags_dbg)
+        free(cflags_dbg);
     return;
 }
