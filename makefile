@@ -78,10 +78,12 @@ lint	: $(SRC) __lambda.c
 	for FILE in $^; do \
 		clang --analyze -ansi \
 			-DNDEBUG -D__NBINPUT=4 -D__EXPR=A+B+C+D \
+			-D__NX=512 -D__NY=512 \
 			-I. $$FILE || exit 1; done;
 	for FILE in $^; do \
 		splint -ansi-lib -weak -castfcnptr \
 			-DNDEBUG -D__NBINPUT=4 -D__EXPR=A+B+C+D \
+			-D__NX=512 -D__NY=512 \
 			-I. $$FILE || exit 1; done;
 	$(RM) *.plist
 # debug build
