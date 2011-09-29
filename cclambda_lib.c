@@ -32,6 +32,8 @@
 #include <unistd.h>
 #else
 int mkstemp(const char *);
+FILE *fdopen(int, const char *);
+int close(int);
 #endif
 
 #include <dlfcn.h>              /* dlopen() */
@@ -61,9 +63,9 @@ void loop_with_libtcc(const char *expr, int nbinput,
     lambda_fp funcp;
 
     DBG_PRINTF0("compile with embedded libtcc\n");
-    sprintf(nbinput_s, "%i", nbinput);
-    sprintf(nx_s, "%lu", nx);
-    sprintf(ny_s, "%lu", ny);
+    snprintf(nbinput_s, 16, "%i", nbinput);
+    snprintf(nx_s, 16, "%lu", nx);
+    snprintf(ny_s, 16, "%lu", ny);
     /* compile lambda */
     tcc = tcc_new();
     tcc_set_warning(tcc, "all", 1);
@@ -146,12 +148,11 @@ void loop_with_cc(const char *expr, int nbinput,
     strcpy(fname_obj, fname_obj_tmpl);
     strcat(fname_obj, ".so");
     rename(fname_obj_tmpl, fname_obj);
-    /* TODO: use snprintf() */
     /* TODO: insert warnings */
-    sprintf(cmd, "%s %s "
-            "-D__EXPR='%s' -D__NBINPUT=%i -D__NX=%lu -D__NY=%lu "
-            "-shared -o %s %s",
-            cc, cflags, expr, nbinput, nx, ny, fname_obj, fname_src);
+    snprintf(cmd, 512, "%s %s "
+             "-D__EXPR='%s' -D__NBINPUT=%i -D__NX=%lu -D__NY=%lu "
+             "-shared -o %s %s",
+             cc, cflags, expr, nbinput, nx, ny, fname_obj, fname_src);
     DBG_PRINTF1("cmd\t'%s'\n", cmd);
     /* compile */
     if (0 == system(NULL))
