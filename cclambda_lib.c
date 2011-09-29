@@ -110,6 +110,7 @@ void loop_with_cc(const char *expr, int nbinput,
     cflags = getenv("CFLAGS");
     if (NULL == cflags)
         cflags = cflags_empty;
+    /* TODO: add -g in debug mode */
     DBG_PRINTF1("CC\t'%s'\n", cc);
     DBG_PRINTF1("CFLAGS\t'%s'\n", cflags);
     /* temporary source file */
@@ -123,9 +124,9 @@ void loop_with_cc(const char *expr, int nbinput,
     (void) tmpnam(fname_obj);
     strcat(fname_obj, ".so");
     /* TODO: use snprintf() */
-    /* TODO: insert -g in debug mode */
     /* TODO: insert warnings */
-    sprintf(cmd, "%s %s -D__EXPR='%s' -D__NBINPUT=%i -D__NX=%lu -D__NY=%lu "
+    sprintf(cmd, "%s %s "
+            "-D__EXPR='%s' -D__NBINPUT=%i -D__NX=%lu -D__NY=%lu "
             "-shared -o %s %s",
             cc, cflags, expr, nbinput, nx, ny, fname_obj, fname_src);
     DBG_PRINTF1("cmd\t'%s'\n", cmd);

@@ -38,7 +38,7 @@
     "        -h       this help\n"                              \
     "        imgN.png 1 to 4 input files\n"                     \
     "                 '-' for stdin\n"                          \
-    "        no '__', ';' or '\'' allowed expr"
+    "        no '__', ';' or '\'' allowed in expr\n"
 
 /**
  * command-line handler

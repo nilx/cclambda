@@ -1,19 +1,19 @@
 % cclambda: C compiled lambda filter on images
 
-# USAGE
+# SYNOPSIS
 
   ./cclambda a.png b.png "expression" > out.png
-  cat a.png b.png | ./cclambda - - "expression" > out.png
+  CC=gcc CFLAGS="-O3 -funroll-loops" ./cclambda a.png b.png "expression" > out.png
 
 # DESCRIPTION
 
 cclambda applies an expression to all the pixels of a collection of
-images. The goal of cclambda is almost identical to Enric Meinhardt's
+images. The goal of cclambda is similar to Enric Meinhardt's
 plambda[1], and cclambda was started after thinking about possible
 variations around plambda. The main differences between the two codes
-is that cclambda implements no expression parser or dynamic RPN
-execution; instead, cclambda writes the expression in a C code
-context, compiles it and execute the result.
+is that cclambda implements no expression parser, stack or dynamic
+instruction handling; instead, cclambda writes the expression in a
+plain C code context, compiles it and execute the result.
 
 cclambda is less formal and elegant than plambda, it's on the "dirty
 hack" side of the force. I hope cclambda can be faster than plambda, or
@@ -28,16 +28,16 @@ the usefullness of cclambda and the interest of the author.
 
 # REQUIREMENTS
 
-
+- a POSIX system (dlopen() is used)
 - a C compiler to build cclambda
-- xxd to format __lambda.h
 - libtcc for dynamic run-time compilation
 - libpng+zlib to read and write PNG images
 
 # FILES
 
+- cclambda.c   cli handler
 - cclambda.c   main code
-- __lambda.c   dynamically compiled code template
+- __lambda.h   dynamically compiled code template, from __laqmbda.c
 - io_png.{c,h} libpng wrapper
 
 # COMPILATION
@@ -45,7 +45,26 @@ the usefullness of cclambda and the interest of the author.
 Use the makefile, with `make`. You can embed libpng and libtcc in
 cclambda by a static build with `make STATIC=1`.
 
-# SYNTAX
+# USAGE
+
+    cclambda [-c|-h]
+    cclambda img1.png img2.png ... 'expr'
+
+        -c       dump loop code
+        -h       this help
+        imgN.png 1 to 4 input files
+                 '-' for stdin
+        no '__', ';' or ''' allowed in expr
+
+The default C compiler is the embedded libtcc. It is a fast C
+compiling tool with few optimizations. For complex expression on large
+images, you can benefit from compiler optimization by specifying an
+external compiler and the compiling flags in the CC and CFLAGS
+environment variables:
+
+    CC=gcc CFLAGS="-O3 -funroll-loops" ./cclambda a.png b.png "expression" > out.png
+
+# EXPRESSION SYNTAX
 
 The "expression" is a C expression, inserted in a pixel loop similar to:
 
@@ -134,7 +153,6 @@ Display the three RGB channels:
 
 # TODO
 
-Add local compiler altenative
 Optional OpenMP support
 More macros
 Compare speed with plambda.
