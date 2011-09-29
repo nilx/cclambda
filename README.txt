@@ -28,7 +28,7 @@ the usefullness of cclambda and the interest of the author.
 
 # REQUIREMENTS
 
-- a POSIX system (dlopen() is used)
+- a POSIX system (for dlopen(), mkstemp(), ...)
 - a C compiler to build cclambda
 - libtcc for dynamic run-time compilation,
   if WITHOUT_LIBTCC is not defined at compile time

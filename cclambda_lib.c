@@ -19,15 +19,17 @@
  *
  * @author Nicolas Limare <nicolas.limare@cmla.ens-cachan.fr>
  *
- * @todo: use safe POSIX functions (execvp, snprintf, mkstemp, ...)
- * @todo: pass image size as cpp macro for unrolled loops
+ * @todo: use POSIX execvp() to check exec result
  */
+
+#define _XOPEN_SOURCE 500       /* mkstemp(), close() */
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
-#include <dlfcn.h>
+#include <unistd.h>
+#include <dlfcn.h>              /* dlopen() */
 
 #ifndef WITHOUT_LIBTCC
 #include <libtcc.h>
@@ -101,7 +103,10 @@ void loop_with_cc(const char *expr, int nbinput,
 {
     char *cc, *cflags;
     char cflags_empty[] = "";
-    char fname_src[L_tmpnam + 2], fname_obj[L_tmpnam + 3];
+    char fname_src_tmpl[] = "/tmp/cclambda_src_XXXXXX";
+    char fname_obj_tmpl[] = "/tmp/cclambda_obj_XXXXXX";
+    char fname_src[] = "/tmp/cclambda_src_XXXXXX.c";
+    char fname_obj[] = "/tmp/cclambda_obj_XXXXXX.so";
     FILE *fd;
     char cmd[512];
     void *dl;
@@ -118,16 +123,18 @@ void loop_with_cc(const char *expr, int nbinput,
     /* TODO: add -g in debug mode */
     DBG_PRINTF1("CC\t'%s'\n", cc);
     DBG_PRINTF1("CFLAGS\t'%s'\n", cflags);
-    /* temporary source file */
-    /* TODO: use mkstemp */
-    (void) tmpnam(fname_src);
-    strcat(fname_src, ".c");
-    fd = fopen(fname_src, "w");
+    /* temporary source and object files */
+    fd = fdopen(mkstemp(fname_src_tmpl), "w");
     (void) fwrite((void *) __lambda_c, sizeof(char), __lambda_c_len, fd);
     fclose(fd);
-    /* build the command line */
-    (void) tmpnam(fname_obj);
+    close(mkstemp(fname_obj_tmpl));
+    /* add suffix for compiler comfort */
+    strcpy(fname_src, fname_src_tmpl);
+    strcat(fname_src, ".c");
+    rename(fname_src_tmpl, fname_src);
+    strcpy(fname_obj, fname_obj_tmpl);
     strcat(fname_obj, ".so");
+    rename(fname_obj_tmpl, fname_obj);
     /* TODO: use snprintf() */
     /* TODO: insert warnings */
     sprintf(cmd, "%s %s "

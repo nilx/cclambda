@@ -20,6 +20,7 @@
  * @author Nicolas Limare <nicolas.limare@cmla.ens-cachan.fr>
  *
  * @todo: multiple io formats
+ * @todo: empty image built on-demand
  */
 
 #include <stdlib.h>

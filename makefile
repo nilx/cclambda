@@ -81,14 +81,14 @@ lint	: $(SRC) __lambda.c
 			-D__NX=512 -D__NY=512 \
 			-I. $$FILE || exit 1; done;
 	for FILE in $^; do \
-		splint -ansi-lib -weak -castfcnptr \
+		splint -ansi-lib +posixlib -weak -castfcnptr \
 			-DNDEBUG -D__NBINPUT=4 -D__EXPR=A+B+C+D \
 			-D__NX=512 -D__NY=512 \
 			-I. $$FILE || exit 1; done;
 	$(RM) *.plist
 # debug build
 debug	: $(SRC)
-	$(MAKE) CFLAGS=-g LDFLAGS="$(LDFLAGS) -lefence"
+	$(MAKE) COPT=-g LDFLAGS="$(LDFLAGS) -lefence"
 # code tests
 test	: $(SRC) $(HDR)
 	sh -e test/run.sh && echo SUCCESS || ( echo ERROR; return 1)
