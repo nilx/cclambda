@@ -15,7 +15,7 @@ BIN	= cclambda
 # standard C compiler optimization options
 COPT	= -O3 -DNDEBUG -funroll-loops
 # complete C compiler options
-CFLAGS	= -ansi -pedantic -Wall -Wextra -pipe $(COPT)
+CFLAGS	= -ansi -pedantic -D_XOPEN_SOURCE=500 -Wall -Wextra -pipe $(COPT)
 # linker options
 LDFLAGS	+= -lpng -ltcc -ldl -lm
 
@@ -77,13 +77,13 @@ beautify	: $(SRC) __lambda.c
 lint	: $(SRC) __lambda.c
 	for FILE in $^; do \
 		echo clang $$FILE; \
-		clang --analyze -ansi \
+		clang --analyze -ansi -D_XOPEN_SOURCE=500 \
 			-DNDEBUG -D__NBINPUT=4 -D__EXPR=A+B+C+D \
 			-D__NX=512 -D__NY=512 \
 			-I. $$FILE || exit 1; done;
 	for FILE in $^; do \
 		echo splint $$FILE; \
-		splint -ansi-lib -weak -castfcnptr \
+		splint -ansi-lib -weak -castfcnptr -D_XOPEN_SOURCE=500 \
 			-DNDEBUG -D__NBINPUT=4 -D__EXPR=A+B+C+D \
 			-D__NX=512 -D__NY=512 \
 			-I. $$FILE || exit 1; done;
