@@ -90,7 +90,7 @@ void loop_with_libtcc(const char *expr, int nbinput,
      */
     funcp = (lambda_fp) tcc_get_symbol(tcc, "__lambda");
     if (NULL == funcp)
-        ABORT("missing __lambda symbol");
+        ABORT("missing __lambda() symbol");
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF1("%0.3fs\tcompiling the code with libtcc\n", DBG_CLOCK_S());
     /* run __lambda(in, out); */
