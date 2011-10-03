@@ -164,10 +164,20 @@ void loop_with_cc(const char *expr, int nbinput,
              cc, cflags, expr, nbinput, nx, ny, fname_o, fname_c);
     DBG_PRINTF1("cmd\t'%s'\n", cmd);
     system(cmd);
+    /* try to open the raw object file */
+    fd = fopen(fname_o, "r");
+    if (NULL == fd)
+        ABORT("compilation error");
+    fclose(fd);
     /* link */
     snprintf(cmd, 512, "ld -shared -o %s %s", fname_so, fname_o);
     DBG_PRINTF1("cmd\t'%s'\n", cmd);
     system(cmd);
+    /* try to open the shared object file */
+    fd = fopen(fname_so, "r");
+    if (NULL == fd)
+        ABORT("compilation error");
+    fclose(fd);
     /* dynamic load */
     dl = dlopen(fname_so, RTLD_NOW);
     if (NULL == dl)
