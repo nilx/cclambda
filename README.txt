@@ -172,8 +172,9 @@ Display the three RGB channels:
 
 When cclambda is compiled with `gcc -On` with n > 0, ./cclambda - "(A0
 + A1 + A2) / 3" fails by segmentation fault on tcc_delete(). This
-complex bug has not been investigated yet. Meanwhile, we recommend to
-compile cclambda without optimization. Toy can still use compiler
+complex bug has not been investigated yet, and it may happen with
+other compilation settings. Meanwhile, we recommend to compile
+cclambda without optimization. You can still use compiler
 optimizations for the loop via CFLAGS at run time.
 
 # TODO
