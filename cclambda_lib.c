@@ -35,7 +35,7 @@ FILE *fdopen(int, const char *);
 
 #include <dlfcn.h>              /* dlopen() */
 
-#ifndef WITHOUT_LIBTCC
+#ifdef WITH_LIBTCC
 #include <libtcc.h>
 #endif
 
@@ -47,7 +47,7 @@ FILE *fdopen(int, const char *);
 /** pointer to the compiled __lambda() function */
 typedef void (*lambda_fp) (float *const *, float *);
 
-#ifndef WITHOUT_LIBTCC
+#ifdef WITH_LIBTCC
 /**
  * use the embedded libtcc compiler to build the lambda loop
  */

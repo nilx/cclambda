@@ -15,7 +15,8 @@ BIN	= cclambda
 # standard C compiler optimization options
 COPT	= -O3 -DNDEBUG -funroll-loops
 # complete C compiler options
-CFLAGS	= -ansi -pedantic -D_XOPEN_SOURCE=500 -Wall -Wextra -pipe $(COPT)
+CFLAGS	= -ansi -pedantic -D_XOPEN_SOURCE=500 -Wall -Wextra -pipe \
+		$(COPT) -DWITH_LIBTCC
 # linker options
 LDFLAGS	+= -lpng -ltcc -ldl -lm
 

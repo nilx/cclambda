@@ -35,7 +35,7 @@
 #define STATIC_STR ""
 #endif
 
-#ifdef WITHOUT_LIBTCC
+#ifndef WITH_LIBTCC
 #define LIBTCC_STR ", without libtcc"
 #else
 #define LIBTCC_STR ", with libtcc"
@@ -98,8 +98,8 @@ int main(int argc, char **argv)
     _ny = 0;
     /* read input images */
     for (i = 0; i < nbinput; i++) {
-        in[i] =
-            io_png_read_pp_flt(argv[i + 1], &nx, &ny, NULL, IO_PNG_OPT_RGB);
+        in[i] = io_png_read_pp_flt(argv[i + 1], &nx, &ny, NULL,
+				   IO_PNG_OPT_RGB);
         if (0 == i) {
             /* store thje first size */
             _nx = nx;
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
     out = (float *) malloc(3 * nx * ny * sizeof(float));
 
     /* compile and run the lambda loop */
-#ifdef WITHOUT_LIBTCC
+#ifndef WITH_LIBTCC
     loop_with_cc(expr, nbinput, in, out, nx, ny);
 #else
     if (NULL == getenv("CC"))
