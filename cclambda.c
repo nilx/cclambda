@@ -36,6 +36,12 @@
 #define STATIC_STR ""
 #endif
 
+#ifndef NDEBUG
+#define DEBUG_STR ", debug mode"
+#else
+#define DEBUG_STR ""
+#endif
+
 #ifndef WITH_LIBTCC
 #define LIBTCC_STR ", without libtcc"
 #define LIBTCC_SYNTAX ""
@@ -45,7 +51,7 @@
 #endif
 
 #define USAGE \
-    "cclambda, compiled " __DATE__ STATIC_STR LIBTCC_STR "\n"           \
+    "cclambda, compiled " __DATE__ STATIC_STR DEBUG_STR LIBTCC_STR "\n" \
     "\n"                                                                \
     "syntax: cclambda [-c|-h]\n"                                        \
     LIBTCC_SYNTAX \
