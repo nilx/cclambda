@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 
 #ifndef S_SPLINT_S              /* see http://bugs.debian.org/476228 */
 #include <unistd.h>
@@ -43,6 +44,42 @@ FILE *fdopen(int, const char *);
 
 /* ensure consistency */
 #include "cclambda_lib.h"
+
+/** abort() wrapper macro with an error message */
+#define ABORT(MSG) do {                                         \
+    fprintf(stderr, "%s:%04u : %s\n", __FILE__, __LINE__, MSG); \
+    fflush(NULL);                                               \
+    abort();                                                    \
+    } while (0);
+
+#ifndef NDEBUG
+/** printf()-like debug statements */
+#define DBG_PRINTF0(STR) {fprintf(stderr, STR);}
+#define DBG_PRINTF1(STR, A1) {fprintf(stderr, STR, A1);}
+/** clock counter array, initialized to 0 (K&R2, p.86) */
+#define DBG_CLOCK_NB 16
+static clock_t _dbg_clock_counter[DBG_CLOCK_NB];
+/** reset a CPU clock counter */
+#define DBG_CLOCK_RESET(N) { _dbg_clock_counter[N] = 0; }
+/** toggle (start/stop) a CPU clock counter */
+#define DBG_CLOCK_TOGGLE(N) { \
+        _dbg_clock_counter[N] = clock() - _dbg_clock_counter[N]; }
+/** reset and toggle the CPU clock counter */
+#define DBG_CLOCK_START(N) { DBG_CLOCK_RESET(N); DBG_CLOCK_TOGGLE(N); }
+/** CPU clock counter */
+#define DBG_CLOCK(N) ((long) _dbg_clock_counter[N])
+/** CPU clock time in seconds */
+#define DBG_CLOCK_S(N) ((float) _dbg_clock_counter[N] / CLOCKS_PER_SEC)
+#else
+#define DBG_PRINTF0(STR) {}
+#define DBG_PRINTF1(STR, A1) {}
+#define DBG_CLOCK_NB 0;
+#define DBG_CLOCK_RESET(N) {}
+#define DBG_CLOCK_TOGGLE(N) {}
+#define DBG_CLOCK_START(N) {}
+#define DBG_CLOCK(N) (-1)
+#define DBG_CLOCK_S(N) (-1.)
+#endif
 
 /** pointer to the compiled __lambda() function */
 typedef void (*lambda_fp) (float *const *, float *);
@@ -64,6 +101,7 @@ void loop_with_libtcc(const char *expr, int nbinput,
     snprintf(nx_s, 16, "%lu", nx);
     snprintf(ny_s, 16, "%lu", ny);
     /* compile lambda */
+    DBG_CLOCK_START(0);
     tcc = tcc_new();
     tcc_set_warning(tcc, "all", 1);
     tcc_define_symbol(tcc, "__EXPR", expr);
@@ -90,8 +128,13 @@ void loop_with_libtcc(const char *expr, int nbinput,
     funcp = (lambda_fp) tcc_get_symbol(tcc, "__lambda");
     if (NULL == funcp)
         ABORT("missing __lambda symbol");
+    DBG_CLOCK_TOGGLE(0);
+    DBG_PRINTF1("CPU time in compilation: %0.3fs\n", DBG_CLOCK_S(0));
     /* run __lambda(in, out); */
+    DBG_CLOCK_START(0);
     (*funcp) (in, out);
+    DBG_CLOCK_TOGGLE(0);
+    DBG_PRINTF1("CPU time in loop execution: %0.3fs\n", DBG_CLOCK_S(0));
     /* cleanup */
     tcc_delete(tcc);
     free(tccmem);
@@ -146,6 +189,7 @@ void loop_with_cc(const char *expr, int nbinput,
     strcpy(fname_so, fname);
     strcat(fname_so, ".so");
     /* compile */
+    DBG_CLOCK_START(0);
     /* TODO: insert warnings */
     if (0 == system(NULL))
         ABORT("no command processor");
@@ -168,8 +212,13 @@ void loop_with_cc(const char *expr, int nbinput,
     funcp = (lambda_fp) dlsym(dl, "__lambda");
     if (NULL == funcp)
         ABORT("missing __lambda symbol");
+    DBG_CLOCK_TOGGLE(0);
+    DBG_PRINTF1("CPU time in compilation: %0.3fs\n", DBG_CLOCK_S(0));
     /* run __lambda(in, out); */
+    DBG_CLOCK_START(0);
     (*funcp) (in, out);
+    DBG_CLOCK_TOGGLE(0);
+    DBG_PRINTF1("CPU time in loop execution: %0.3fs\n", DBG_CLOCK_S(0));
     /* cleanup */
     dlclose(dl);
     remove(fname_c);

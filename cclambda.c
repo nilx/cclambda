@@ -25,6 +25,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "io_png.h"
 #include "cclambda_lib.h"
@@ -99,7 +100,7 @@ int main(int argc, char **argv)
     /* read input images */
     for (i = 0; i < nbinput; i++) {
         in[i] = io_png_read_pp_flt(argv[i + 1], &nx, &ny, NULL,
-				   IO_PNG_OPT_RGB);
+                                   IO_PNG_OPT_RGB);
         if (0 == i) {
             /* store thje first size */
             _nx = nx;
