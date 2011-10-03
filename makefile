@@ -25,7 +25,7 @@ LDFLAGS	+= -lpng -ltcc -ldl -lm
 ifdef STATIC
 # link options to use the local libraries
 LDFLAGS	= /usr/lib/libpng.a /usr/lib/libz.a /usr/lib/libtcc.a -ldl -lm
-CPPFLAGS	:= $(CPPLAGS) -DSTATIC
+CPPFLAGS	:= $(CPPFLAGS) -DSTATIC
 endif
 
 # default target: the binary executable programs
