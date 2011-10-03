@@ -75,18 +75,18 @@ beautify	: $(SRC) __lambda.c
 	done
 	$(MAKE) __lambda.h
 # static code analysis
+CLANG_OPTS	= --analyze -ansi
+SPLINT_OPTS	= -ansi-lib -weak -castfcnptr
+CPPFLAGS	= -D_XOPEN_SOURCE=500 -DWITH_LIBTCC \
+	-D__NBINPUT=4 -D__EXPR=A+B+C+D -D__NX=512 -D__NY=512
 lint	: $(SRC) __lambda.c
 	for FILE in $^; do \
 		echo clang $$FILE; \
-		clang --analyze -ansi -D_XOPEN_SOURCE=500 \
-			-DNDEBUG -D__NBINPUT=4 -D__EXPR=A+B+C+D \
-			-D__NX=512 -D__NY=512 \
+		clang $(CLANG_OPTS) $(CPPFLAGS) \
 			-I. $$FILE || exit 1; done;
 	for FILE in $^; do \
 		echo splint $$FILE; \
-		splint -ansi-lib -weak -castfcnptr -D_XOPEN_SOURCE=500 \
-			-DNDEBUG -D__NBINPUT=4 -D__EXPR=A+B+C+D \
-			-D__NX=512 -D__NY=512 \
+		splint $(SPLINT_OPTS) $(CPPFLAGS) \
 			-I. $$FILE || exit 1; done;
 	$(RM) *.plist
 # debug build
