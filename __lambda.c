@@ -86,10 +86,18 @@ void __lambda(float *const *__in, float *__out)
 {
 
     size_t __n;
+#if (__NBINPUT >= 1)
     const float *__a = __in[0];
+#endif
+#if (__NBINPUT >= 2)
     const float *__b = __in[1];
+#endif
+#if (__NBINPUT >= 3)
     const float *__c = __in[2];
+#endif
+#if (__NBINPUT >= 4)
     const float *__d = __in[2];
+#endif
 
     for (__n = 0; __n < NC * NX * NY; __n++) {
         __out[__n] = __EXPR;
