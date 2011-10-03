@@ -17,7 +17,7 @@
 #endif
 
 #ifndef __NBINPUT
-#define __NBINPUT 1
+#define __NBINPUT 0
 #endif
 
 #ifndef __NX
