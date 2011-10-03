@@ -22,6 +22,8 @@
  * @todo: use POSIX execvp() to check exec result
  */
 
+#define _XOPEN_SOURCE 500       /* for snprintf(), fdopen(), mkstemp() */
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

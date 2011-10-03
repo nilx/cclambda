@@ -13,10 +13,11 @@ OBJ	= $(SRC:.c=.o)
 BIN	= cclambda
 
 # standard C compiler optimization options
-COPT	= -O3 -DNDEBUG -funroll-loops
+COPT	= -O3
 # complete C compiler options
-CFLAGS	= -ansi -pedantic -D_XOPEN_SOURCE=500 -Wall -Wextra -pipe \
-		$(COPT) -DWITH_LIBTCC
+CFLAGS	= -ansi -pedantic -Wall -Wextra -pipe $(COPT)
+# preprocessor options
+CPPFLAGS	= -DNDEBUG -DWITH_LIBTCC
 # linker options
 LDFLAGS	+= -lpng -ltcc -ldl -lm
 
@@ -24,7 +25,7 @@ LDFLAGS	+= -lpng -ltcc -ldl -lm
 ifdef STATIC
 # link options to use the local libraries
 LDFLAGS	= /usr/lib/libpng.a /usr/lib/libz.a /usr/lib/libtcc.a -ldl -lm
-CFLAGS	:= $(CFLAGS) -DSTATIC
+CPPFLAGS	:= $(CPPLAGS) -DSTATIC
 endif
 
 # default target: the binary executable programs
@@ -40,7 +41,7 @@ cclambda.o	: cclambda.c __lambda.h
 
 # partial C compilation xxx.c -> xxx.o
 %.o	: %.c
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 # final link
 cclambda	: cclambda.o cclambda_lib.o io_png.o
@@ -77,21 +78,21 @@ beautify	: $(SRC) __lambda.c
 # static code analysis
 CLANG_OPTS	= --analyze -ansi
 SPLINT_OPTS	= -ansi-lib -weak -castfcnptr
-CPPFLAGS	= -D_XOPEN_SOURCE=500 -DWITH_LIBTCC \
-	-D__NBINPUT=4 -D__EXPR=A+B+C+D -D__NX=512 -D__NY=512
+CPPFLAGS2	= -D__NBINPUT=4 -D__EXPR=A+B+C+D -D__NX=512 -D__NY=512
 lint	: $(SRC) __lambda.c
 	for FILE in $^; do \
 		echo clang $$FILE; \
-		clang $(CLANG_OPTS) $(CPPFLAGS) \
+		clang $(CLANG_OPTS) $(CPPFLAGS) $(CPPFLAGS2) -UNDEBUG \
 			-I. $$FILE || exit 1; done;
 	for FILE in $^; do \
 		echo splint $$FILE; \
-		splint $(SPLINT_OPTS) $(CPPFLAGS) \
+		splint $(SPLINT_OPTS) $(CPPFLAGS) $(CPPFLAGS2) -UNDEBUG \
 			-I. $$FILE || exit 1; done;
 	$(RM) *.plist
 # debug build
 debug	: $(SRC)
-	$(MAKE) COPT=-g LDFLAGS="$(LDFLAGS) -lefence"
+	$(MAKE) COPT=-g CPPFLAGS="$(CPPFLAGS) -UNDEBUG" \
+		LDFLAGS="$(LDFLAGS) -lefence"
 # code tests
 test	: $(SRC) $(HDR)
 	sh -e test/run.sh && echo SUCCESS || ( echo ERROR; return 1)
