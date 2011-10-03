@@ -13,7 +13,7 @@ OBJ	= $(SRC:.c=.o)
 BIN	= cclambda
 
 # standard C compiler optimization options
-COPT	= -O3
+COPT	= 
 # complete C compiler options
 CFLAGS	= -ansi -pedantic -Wall -Wextra -pipe $(COPT)
 # preprocessor options
@@ -91,7 +91,7 @@ lint	: $(SRC) __lambda.c
 	$(RM) *.plist
 # debug build
 debug	: $(SRC)
-	$(MAKE) COPT=-g CPPFLAGS="$(CPPFLAGS) -UNDEBUG" \
+	$(MAKE) CFLAGS="$(CFLAGS) -g" CPPFLAGS="$(CPPFLAGS) -UNDEBUG" \
 		LDFLAGS="$(LDFLAGS) -lefence"
 # code tests
 test	: $(SRC) $(HDR)

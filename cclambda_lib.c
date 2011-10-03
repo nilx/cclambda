@@ -88,7 +88,7 @@ void loop_with_libtcc(const char *expr, int nbinput,
     /* get the compiled symbols */
     tccmem = malloc((size_t) tcc_relocate(tcc, NULL));
     if (NULL == tccmem)
-        ABORT("relocation error");
+        ABORT("allocation error");
     if (-1 == tcc_relocate(tcc, tccmem))
         ABORT("relocation error");
     /*

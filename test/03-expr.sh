@@ -5,6 +5,7 @@
 _test_expr() {
     ./cclambda data/lena.png "$EXPR" > /dev/null
     CC=cc ./cclambda data/lena.png "$EXPR" > /dev/null
+    CC=cc CFLAGS=-O3 ./cclambda data/lena.png "$EXPR" > /dev/null
 }
 
 ################################################
@@ -19,7 +20,7 @@ for EXPR in \
     "A_(1,0) - A" \
     "(K == 1 ? 0 : A)" \
     "A2" \
-#    "(A0 + A1 + A2) / 3" \
+    "(A0 + A1 + A2) / 3" \
 #    "hypot(2 * A_(1,0) + A_(1,1) + A_(1,-1) \
 #     - 2 * A_(-1,0) + A_(-1,1) + A_(-1,-1), \
 #     2 * A_(0,1) + A_(1,1) + A_(-1,1) \

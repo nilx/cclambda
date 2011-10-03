@@ -62,7 +62,7 @@ Alternatively, you can manually compile cclambda with
         no '__', ';' or ''' allowed in expr
 
 The default C compiler is the embedded libtcc. It is a fast C
-compiling tool with few optimizations and some bugs[1].
+compiling tool with few optimizations and some bugs (see BUGS).
 For complex expression on large images, you can benefit from compiler
 optimization by specifying an external compiler and the compiling
 flags in the CC and CFLAGS environment variables:
@@ -80,9 +80,6 @@ with GNU ld 2.20.1 and the following compilers:
 - pathcc 4.0.10
 - suncc  5.11
 - icc    12.0.4
-
-[1] ./cclambda - "(A0 + A1 + A2) / 3" fails by segmentation fault with
-libtcc, but not on other compilers.
 
 # EXPRESSION SYNTAX
 
@@ -171,9 +168,18 @@ Display the three RGB channels:
   ./cclambda - "(K == 1 ? A : 0)" < data/lena.png | display
   ./cclambda - "(K == 2 ? A : 0)" < data/lena.png | display
 
+# BUGS
+
+When cclambda is compiled with `gcc -On` with n > 0, ./cclambda - "(A0
++ A1 + A2) / 3" fails by segmentation fault on tcc_delete(). This
+complex bug has not been investigated yet. Meanwhile, we recommend to
+compile cclambda without optimization. Toy can still use compiler
+optimizations for the loop via CFLAGS at run time.
+
 # TODO
 
-Automated test suite
+RGB/gray mode
 Optional OpenMP support
 More macros
-Compare speed with plambda.
+Compare compiler speed
+Compare speed with plambda
