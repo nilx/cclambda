@@ -82,24 +82,17 @@
 #define D2 (__d[I + J * NX + NX * NY * 2])
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+void __lambda(float *const *__in, float *__out)
+{
 
-    void __lambda(float *const *__in, float *__out) {
+    size_t __n;
+    const float *__a = __in[0];
+    const float *__b = __in[1];
+    const float *__c = __in[2];
+    const float *__d = __in[2];
 
-        size_t __n;
-        const float *__a = __in[0];
-        const float *__b = __in[1];
-        const float *__c = __in[2];
-        const float *__d = __in[2];
-
-        for (__n = 0; __n < NC * NX * NY; __n++) {
-            __out[__n] = __EXPR;
-        }
-        return;
+    for (__n = 0; __n < NC * NX * NY; __n++) {
+        __out[__n] = __EXPR;
     }
-
-#ifdef __cplusplus
+    return;
 }
-#endif

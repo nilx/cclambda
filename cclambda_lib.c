@@ -170,13 +170,15 @@ void loop_with_cc(const char *expr, int nbinput,
     system(cmd);
     /* dynamic load */
     dl = dlopen(fname_so, RTLD_NOW);
+    if (NULL == dl)
+        ABORT(dlerror());
     /*
      * see the RATIONALE section of
      * http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
      */
     funcp = (lambda_fp) dlsym(dl, "__lambda");
     if (NULL == funcp)
-        ABORT("missing __lambda symbol");
+        ABORT(dlerror());
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF2("%0.3fs\tcompiling the code with %s\n", DBG_CLOCK_S(), cc);
     /* run __lambda(in, out); */
