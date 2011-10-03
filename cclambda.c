@@ -38,19 +38,21 @@
 
 #ifndef WITH_LIBTCC
 #define LIBTCC_STR ", without libtcc"
+#define LIBTCC_SYNTAX ""
 #else
 #define LIBTCC_STR ", with libtcc"
+#define LIBTCC_SYNTAX "        cclambda img1.png img2.png ... 'expr'\n"
 #endif
 
 #define USAGE \
     "cclambda, compiled " __DATE__ STATIC_STR LIBTCC_STR "\n"           \
     "\n"                                                                \
     "syntax: cclambda [-c|-h]\n"                                        \
-    "        cclambda img1.png img2.png ... 'expr'\n"                   \
+    LIBTCC_SYNTAX \
     "        CC=cc CFLAGS=-O3 cclambda img1.png img2.png ... 'expr'\n"  \
     "\n"                                                                \
     "        -c       dump loop code\n"                                 \
-    "        -h       this help\n"                                      \
+    "        -h       show this help\n"                                 \
     "        imgN.png 1 to 4 input files\n"                             \
     "                 '-' for stdin\n"                                  \
     "        no '__', ';' or '\'' allowed in expr\n"
@@ -98,6 +100,7 @@ int main(int argc, char **argv)
     _nx = 0;
     _ny = 0;
     /* read input images */
+    DBG_CLOCK_START();
     for (i = 0; i < nbinput; i++) {
         in[i] = io_png_read_pp_flt(argv[i + 1], &nx, &ny, NULL,
                                    IO_PNG_OPT_RGB);
@@ -114,6 +117,7 @@ int main(int argc, char **argv)
             }
         }
     }
+    DBG_CLOCK_TOGGLE();
     /* allocate output image */
     out = (float *) malloc(3 * nx * ny * sizeof(float));
 
@@ -130,7 +134,10 @@ int main(int argc, char **argv)
 #endif
 
     /* write output images */
+    DBG_CLOCK_TOGGLE();
     io_png_write_flt("-", out, nx, ny, 3);
+    DBG_CLOCK_TOGGLE();
+    DBG_PRINTF1("%0.3fs\treading and writing the files\n", DBG_CLOCK_S());
 
     /* cleanup */
     for (i = 0; i < nbinput; i++)
