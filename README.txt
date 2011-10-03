@@ -46,6 +46,10 @@ the usefullness of cclambda and the interest of the author.
 Use the makefile, with `make`. You can embed libpng and libtcc in
 cclambda by a static build with `make STATIC=1`.
 
+Alternatively, you can manually compile cclambda with
+    cc cclambda.c cclambda_lib.c io_png.c -DWITH_LIBTCC -DNDEBUG \
+    -ltcc -lpng -ldl -o cclambda
+
 # USAGE
 
     cclambda [-c|-h]
