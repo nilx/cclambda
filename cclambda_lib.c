@@ -19,6 +19,10 @@
  *
  * @author Nicolas Limare <nicolas.limare@cmla.ens-cachan.fr>
  *
+
+     * see the RATIONALE section of
+     * http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
+
  * @todo: use POSIX execvp() to check exec result
  */
 
@@ -79,7 +83,9 @@ void loop_with_libtcc(const char *expr, int nbinput,
     DBG_PRINTF1("__NY\t'%s'\n", ny_s);
     tcc_set_output_type(tcc, TCC_OUTPUT_MEMORY);
 #ifndef NDEBUG
-    /* missing in libtcc
+    /*
+     * missing in libtcc, see
+     * http://repo.or.cz/w/tinycc.git/commit/5f99fe2f
      * tcc_enable_debug(tcc);
      */
 #endif
@@ -91,10 +97,7 @@ void loop_with_libtcc(const char *expr, int nbinput,
         ABORT("allocation error");
     if (-1 == tcc_relocate(tcc, tccmem))
         ABORT("relocation error");
-    /*
-     * see the RATIONALE section of
-     * http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
-     */
+    /* see the header of this file about compiler warnings */
     funcp = (lambda_fp) tcc_get_symbol(tcc, "__lambda");
     if (NULL == funcp)
         ABORT("missing __lambda() symbol");
@@ -187,10 +190,7 @@ void loop_with_cc(const char *expr, int nbinput,
     dl = dlopen(fname_so, RTLD_NOW);
     if (NULL == dl)
         ABORT(dlerror());
-    /*
-     * see the RATIONALE section of
-     * http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
-     */
+    /* see the header of this file about compiler warnings */
     funcp = (lambda_fp) dlsym(dl, "__lambda");
     if (NULL == funcp)
         ABORT(dlerror());

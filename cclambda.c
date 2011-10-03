@@ -109,7 +109,7 @@ int main(int argc, char **argv)
     DBG_CLOCK_START();
     for (i = 0; i < nbinput; i++) {
         in[i] = io_png_read_pp_flt(argv[i + 1], &nx, &ny, NULL,
-                                   IO_PNG_OPT_RGB);
+                                   IO_PNG_OPT_GRAY);
         if (0 == i) {
             /* store thje first size */
             _nx = nx;
@@ -125,7 +125,7 @@ int main(int argc, char **argv)
     }
     DBG_CLOCK_TOGGLE();
     /* allocate output image */
-    out = (float *) malloc(3 * nx * ny * sizeof(float));
+    out = (float *) malloc(nx * ny * sizeof(float));
 
     /* compile and run the lambda loop */
 #ifndef WITH_LIBTCC
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 
     /* write output images */
     DBG_CLOCK_TOGGLE();
-    io_png_write_flt("-", out, nx, ny, 3);
+    io_png_write_flt("-", out, nx, ny, 1);
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF1("%0.3fs\treading and writing the files\n", DBG_CLOCK_S());
 

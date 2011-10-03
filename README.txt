@@ -3,7 +3,7 @@
 # SYNOPSIS
 
   ./cclambda a.png b.png "expression" > out.png
-  CC=gcc CFLAGS="-O3 -funroll-loops" ./cclambda a.png b.png "expr" > out.png
+  CC=gcc CFLAGS="-O3 -ffast-math" ./cclambda a.png b.png "expr" > out.png
 
 # DESCRIPTION
 
@@ -20,9 +20,9 @@ hack" side of the force. I hope cclambda can be faster than plambda, or
 at least be the proof of concept of another implementation.
 
 cclambda a very early development stage, which means the
-functionnalities are limited and the implementation is hacky and full
+features are limited and the implementation is hacky and full
 of bugs. Further development may or may not improve it, depending on
-the usefullness of cclambda and the interest of the author.
+the usefulness of cclambda and the interest of the author.
 
 [1] http://dev.ipol.im/git/?p=coco/imscript.git
 
@@ -36,10 +36,10 @@ the usefullness of cclambda and the interest of the author.
 
 # FILES
 
-- cclambda.c   cli handler
-- cclambda.c   main code
-- __lambda.h   dynamically compiled code template, from __laqmbda.c
-- io_png.{c,h} libpng wrapper
+- cclambda.c     cli handler
+- cclambda_lib.c main code
+- __lambda.h     dynamically compiled code template, from __lambda.c
+- io_png.{c,h}   libpng wrapper
 
 # COMPILATION
 
@@ -90,30 +90,25 @@ The "expression" is a C expression, inserted in a pixel loop similar to:
 	    output[i, j] = <expression>;
 
 The expression can contain any C code valid in this context. The libc
-math.h header is included, so all the constants and fonctions defined
+math.h header is included, so all the constants and functions defined
 in this header (on your system) are available.
 
-The inputt images are read as RGB float arrays with values in
+The input images are read as grayscale float arrays with values in
 [0,1]. They must all have the same size. The output image is written
-from a RGB floar array with values in [0,1]. You can refer to the
-input image values as A, B, C and D. no more than 4 input images are
+from a grayscale float array with values in [0,1]. You can refer to the
+input image values as A, B, C and D. No more than 4 input images are
 (currently) supported.
-
-For each input image, you can explicitely select a color channel: A0,
-A1, A2, are the values of the red, green and blue channels of the
-first image.
 
 The image width and height are available as the NX and NY macros. You
 van also access the current horizontal and vertical coordinates via
-the I and J macros, in [0,NX[ ans [0,NY[. The current channel is K in
-[0,3[.
+the I and J macros, in [0,NX[ ans [0,NY[.
 
 Some other convenience macros are available:
 - N  number of pixels in the image
 - R2 square normalized distance to the center of the image
 - T  angle from the center of the image
 
-For ecery image, some pixel position modifiers are available:
+For every image, some pixel position modifiers are available:
 A_(dx, dy) is the value of the image A on the pixel I+dx, _J+dy.
 
 A value of pixel (I,J)
@@ -144,43 +139,19 @@ Sobel edge detector:
                  2 * A_(0,1) + A_(1,1) + A_(-1,1)
                  - 2 * A_(0,-1) + A_(1,-1) + A_(-1,-1))" > sobel.png
 
-Set to 0 the green component of a RGB image:
-
-  cclambda - "(K == 1 ? 0 : A)" < lena.png > nogreen.png
-
-Pick the blue channel of a RGB image:
-
-  cclambda "A2"
-
-Color to gray:
-
-  cclambda "(A0 + A1 + A2) / 3"
-
-Swap the red an green channels of a RGB image:
-
-  ( cclambda - "(K == 0 ? A2 : A)" < lena.png; 
-    cclambda - "(K == 2 ? A0 : A)" < lena.png ) \
-    | cclambda - - "(K == 0 ? A : B)" > lena_bgr.png
-
-Display the three RGB channels:
-
-  ./cclambda - "(K == 0 ? A : 0)" < data/lena.png | display
-  ./cclambda - "(K == 1 ? A : 0)" < data/lena.png | display
-  ./cclambda - "(K == 2 ? A : 0)" < data/lena.png | display
-
 # BUGS
 
-When cclambda is compiled with `gcc -On` with n > 0, ./cclambda - "(A0
-+ A1 + A2) / 3" fails by segmentation fault on tcc_delete(). This
-complex bug has not been investigated yet, and it may happen with
-other compilation settings. Meanwhile, we recommend to compile
-cclambda without optimization. You can still use compiler
-optimizations for the loop via CFLAGS at run time.
+Some expressions trigger a segmentation fault on tcc_compile() or
+tcc_delete(). This complex bug has not been investigated yet, and it
+may or may not happen depending on the compilation
+settings. Meanwhile, we recommend to compile cclambda without
+optimization, as it seems to "solve" some of these errors. You can
+still use compiler optimizations for the loop via CFLAGS at run time.
 
 # TODO
 
-RGB/gray mode
-Optional OpenMP support
-More macros
 Compare compiler speed
 Compare speed with plambda
+Optional OpenMP support
+More macros
+RGB solution
