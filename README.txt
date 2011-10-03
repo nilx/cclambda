@@ -62,10 +62,10 @@ Alternatively, you can manually compile cclambda with
         no '__', ';' or ''' allowed in expr
 
 The default C compiler is the embedded libtcc. It is a fast C
-compiling tool with few optimizations. For complex expression on large
-images, you can benefit from compiler optimization by specifying an
-external compiler and the compiling flags in the CC and CFLAGS
-environment variables:
+compiling tool with few optimizations and some bugs[1].
+For complex expression on large images, you can benefit from compiler
+optimization by specifying an external compiler and the compiling
+flags in the CC and CFLAGS environment variables:
 
     CC=gcc CFLAGS="-O3" ./cclambda a.png b.png "expression" > out.png
 
@@ -80,6 +80,9 @@ with GNU ld 2.20.1 and the following compilers:
 - pathcc 4.0.10
 - suncc  5.11
 - icc    12.0.4
+
+[1] ./cclambda - "(A0 + A1 + A2) / 3" fails by segmentation fault with
+libtcc, but not on other compilers.
 
 # EXPRESSION SYNTAX
 

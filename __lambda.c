@@ -100,7 +100,7 @@ void __lambda(float *const *__in, float *__out)
 #endif
 
     for (__n = 0; __n < NC * NX * NY; __n++) {
-        __out[__n] = __EXPR;
+        __out[__n] = (__EXPR);
     }
     return;
 }

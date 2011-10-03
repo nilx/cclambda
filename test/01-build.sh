@@ -30,7 +30,8 @@ _log make clean
 _log make
 
 echo "* compiler support"
-for CC in cc c++ gcc g++ tcc nwcc clang icc pathcc suncc; do
+#for CC in cc c++ gcc g++ tcc nwcc clang icc pathcc suncc; do
+for CC in ; do # this test is very long and not crucial 
     which $CC || continue
     echo "* $CC compiler"
     case $CC in
