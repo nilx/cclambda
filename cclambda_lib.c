@@ -78,6 +78,11 @@ void loop_with_libtcc(const char *expr, int nbinput,
     DBG_PRINTF1("__NX\t'%s'\n", nx_s);
     DBG_PRINTF1("__NY\t'%s'\n", ny_s);
     tcc_set_output_type(tcc, TCC_OUTPUT_MEMORY);
+#ifndef NDEBUG
+    /* missing in libtcc
+     * tcc_enable_debug(tcc);
+     */
+#endif
     if (0 != tcc_compile_string(tcc, (const char *) __lambda_c))
         ABORT("compilation error");
     /* get the compiled symbols */
