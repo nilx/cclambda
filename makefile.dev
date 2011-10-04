@@ -1,0 +1,49 @@
+# -*- makefile -*-
+# Copyright 2011 Nicolas Limare <nicolas.limare@cmla.ens-cachan.fr>
+#
+# Copying and distribution of this file, with or without
+# modification, are permitted in any medium without royalty provided
+# the copyright notice and this notice are preserved.  This file is
+# offered as-is, without any warranty.
+
+DATE	= $(shell date -u +%Y%m%d)
+RELEASE_TAG   = 0.$(DATE)
+
+.PHONY	: srcdoc lint beautify debug test release
+# source documentation
+srcdoc	: $(SRC) __lambda.c __lambda.h
+	doxygen doc/doxygen.conf
+# code cleanup
+beautify	: $(SRC) __lambda.c
+	for FILE in $^; do \
+		expand $$FILE | sed 's/[ \t]*$$//' > $$FILE.$$$$ \
+		&& indent -kr -i4 -l78 -nut -nce -sob -sc \
+			$$FILE.$$$$ -o $$FILE \
+		&& rm $$FILE.$$$$; \
+	done
+	$(MAKE) __lambda.h
+# static code analysis
+CLANG_OPTS	= --analyze -ansi
+SPLINT_OPTS	= -ansi-lib -weak -castfcnptr
+CPPFLAGS2	= -D__NBINPUT=4 -D__EXPR=A+B+C+D -D__NX=512 -D__NY=512
+lint	: $(SRC) __lambda.c
+	for FILE in $^; do \
+		echo clang $$FILE; \
+		clang $(CLANG_OPTS) $(CPPFLAGS) $(CPPFLAGS2) -UNDEBUG \
+			-I. $$FILE || exit 1; done;
+	for FILE in $^; do \
+		echo splint $$FILE; \
+		splint $(SPLINT_OPTS) $(CPPFLAGS) $(CPPFLAGS2) -UNDEBUG \
+			-I. $$FILE || exit 1; done;
+	$(RM) *.plist
+# debug build
+debug	: $(SRC)
+	$(MAKE) CFLAGS="$(CFLAGS) -g" CPPFLAGS="$(CPPFLAGS) -UNDEBUG" \
+		LDFLAGS="$(LDFLAGS) -lefence"
+# code tests
+test	: $(SRC) $(HDR)
+	sh -e test/run.sh && echo SUCCESS || ( echo ERROR; return 1)
+# release tarball
+release	: beautify lint test distclean
+	git archive --format=tar --prefix=$(PROJECT)-$(RELEASE_TAG)/ HEAD \
+	        | gzip > ../$(PROJECT)-$(RELEASE_TAG).tar.gz
