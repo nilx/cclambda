@@ -19,7 +19,7 @@ CFLAGS	= -ansi -pedantic -Wall -Wextra -pipe $(COPT)
 # preprocessor options
 CPPFLAGS	= -DNDEBUG -DWITH_LIBTCC
 # linker options
-LDFLAGS	+= -lpng -ltcc -ldl -lm
+LDFLAGS	= -lpng -ltcc -ldl -lm
 
 # static build
 ifdef STATIC
