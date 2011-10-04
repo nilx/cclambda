@@ -150,8 +150,9 @@ still use compiler optimizations for the loop via CFLAGS at run time.
 
 # TODO
 
+Optional OpenMP support
+Float file format
 Compare compiler speed
 Compare speed with plambda
-Optional OpenMP support
 More macros
 RGB solution

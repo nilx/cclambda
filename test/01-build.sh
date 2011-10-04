@@ -8,7 +8,7 @@ _test_run() {
     ./cclambda - "$EXPR" < data/lena.png > ${TEMPFILE}
     for CC in cc gcc tcc nwcc clang icc pathcc suncc; do
 	which $CC || continue
-	CC=${CC} ./cclambda - "$EXPR" < data/lena.png > ${TEMPFILE}
+	CC=$CC ./cclambda - "$EXPR" < data/lena.png > ${TEMPFILE}
     done
 }
 
