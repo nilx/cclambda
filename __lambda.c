@@ -12,6 +12,18 @@
 #include <stdlib.h>
 #include <math.h>
 
+#ifndef NDEBUG
+#include <stdio.h>
+/** printf()-like debug statements */
+#define DBG_PRINTF1(STR, A1) {fprintf(stderr, STR, A1);}
+#else
+#define DBG_PRINTF1(STR, A1) {}
+#endif
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 /*
  * default values
  */
@@ -114,6 +126,7 @@ void __lambda(float *const *__in, float *__RSTRCT __out)
 #endif
 
 #ifdef _OPENMP
+    DBG_PRINTF1("using OpenMP with %i threads\n", omp_get_max_threads());
 #pragma omp parallel for default(shared) private(__n)
 #endif
     for (__n = 0; __n < NX * NY; __n++) {

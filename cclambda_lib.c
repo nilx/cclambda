@@ -82,7 +82,9 @@ void loop_with_libtcc(const char *expr, int nbinput,
     DBG_PRINTF1("__NX\t'%s'\n", nx_s);
     DBG_PRINTF1("__NY\t'%s'\n", ny_s);
     tcc_set_output_type(tcc, TCC_OUTPUT_MEMORY);
-#ifndef NDEBUG
+#ifdef NDEBUG
+    tcc_define_symbol(tcc, "NDEBUG", "1");
+#else
     /*
      * missing in libtcc, see
      * http://repo.or.cz/w/tinycc.git/commit/5f99fe2f
@@ -121,7 +123,7 @@ void loop_with_libtcc(const char *expr, int nbinput,
 void loop_with_cc(const char *expr, int nbinput,
                   float *const *in, float *out, size_t nx, size_t ny)
 {
-    char *cc, *cflags, *cflags_dbg = NULL;
+    char *cc, *cflags, *cflags_tmp = NULL;
     char cflags_empty[] = "";
     char fname[] = "/tmp/cclambda_XXXXXX";
     char fname_c[] = "/tmp/cclambda_XXXXXX.c";
@@ -140,12 +142,20 @@ void loop_with_cc(const char *expr, int nbinput,
     cflags = getenv("CFLAGS");
     if (NULL == cflags)
         cflags = cflags_empty;
-#ifndef NDEBUG
-    /* add -g in debug mode */
-    cflags_dbg = (char *) malloc((strlen(cflags) + 3) * sizeof(char));
-    strcpy(cflags_dbg, cflags);
-    strcat(cflags_dbg, " -g");
-    cflags = cflags_dbg;
+#ifdef NDEBUG
+    /* add "-DNDEBUG" */
+    cflags_tmp = (char *) malloc((strlen(cflags) +
+				  + strlen(" -DNDEBUG")) * sizeof(char));
+    strcpy(cflags_tmp, cflags);
+    strcat(cflags_tmp, " -DNDEBUG");
+    cflags = cflags_tmp;
+#else
+    /* add "-g" in debug mode */
+    cflags_tmp = (char *) malloc((strlen(cflags) 
+				  + strlen(" -g")) * sizeof(char));
+    strcpy(cflags_tmp, cflags);
+    strcat(cflags_tmp, " -g");
+    cflags = cflags_tmp;
 #endif
     DBG_PRINTF1("CC\t'%s'\n", cc);
     DBG_PRINTF1("CFLAGS\t'%s'\n", cflags);
@@ -206,7 +216,7 @@ void loop_with_cc(const char *expr, int nbinput,
     remove(fname_c);
     remove(fname_o);
     remove(fname_so);
-    if (NULL != cflags_dbg)
-        free(cflags_dbg);
+    if (NULL != cflags_tmp)
+        free(cflags_tmp);
     return;
 }
