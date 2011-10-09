@@ -1,9 +1,22 @@
 % cclambda: C compiled lambda filter on images
 
+* synopsis
+* description
+* requirements
+* files
+* compilation
+* usage
+* expression syntax
+* examples
+* advanced use
+* bugs
+* todo
+* copyright
+
 # SYNOPSIS
 
-  ./cclambda a.png b.png "expression" > out.png
-  CC=gcc CFLAGS="-O3 -ffast-math" ./cclambda a.png b.png "expr" > out.png
+    ./cclambda a.png b.png "expression" > out.png
+    CC=gcc CFLAGS="-O3 -ffast-math" ./cclambda a.png b.png "expr" > out.png
 
 # DESCRIPTION
 
@@ -136,7 +149,9 @@ Sobel edge detector:
                  2 * A_(0,1) + A_(1,1) + A_(-1,1)
                  - 2 * A_(0,-1) + A_(1,-1) + A_(-1,-1))" > sobel.png
 
-# ADVANCED USE: MULTI-THREADING
+# ADVANCED USE
+
+## MULTI-THREADING
 
 The cclambda loop processes every pixel with the same operations. This
 is well adapted to parallel processing, and cclambda can use OpenMP
@@ -162,7 +177,7 @@ same compiler and compiler options. But you can use an OpenMP-enabled
 cclambda with any compiler (including the internal libtcc) if you
 don't use parallel processing.
 
-# ADVANCED USE: DEBUG MODE
+## DEBUG MODE
 
 Compiling cclambda in debug mode (without the NDEBUG macro) activates
 debugging options:
@@ -198,3 +213,12 @@ Compare compiler speed
 Compare speed with plambda
 More macros
 RGB solution
+
+# COPYRIGHT
+
+Copyright 2011 Nicolas Limare <nicolas.limare@cmla.ens-cachan.fr>
+
+Copying and distribution of this README file, with or without
+modification, are permitted in any medium without royalty provided
+the copyright notice and this notice are preserved.  This file is
+offered as-is, without any warranty.
