@@ -15,8 +15,7 @@ BIN	= cclambda
 # standard C compiler optimization options
 COPT	= 
 # complete C compiler options
-#CFLAGS	= -ansi -pedantic -Wall -Wextra -pipe $(COPT)
-CFLAGS	= $(COPT)
+CFLAGS	= -ansi -pedantic -Wall -Wextra -pipe $(COPT)
 # preprocessor options
 CPPFLAGS	= -DNDEBUG -DWITH_LIBTCC
 # linker options
@@ -36,11 +35,11 @@ CPPFLAGS_OMP	= -DOMPCC=$(CC)
 CFLAGS_OMP	= -fopenmp
 LDFLAGS_OMP	= -lgomp
 # for icc
-#CFLAGS_OMP	= -openmp -openmp-lib=compat
-#LDFLAGS_OMP	= -openmp -openmp-lib=compat
+#CFLAGS_OMP	= -openmp
+#LDFLAGS_OMP	= -liomp5 -lpthread -L/path/to/libiomp5.so
 # for suncc
 #CFLAGS_OMP	= -xopenmp
-#LDFLAGS_OMP	= -lmtsk
+#LDFLAGS_OMP	= -lmtsk -L/path/to/libmtsk.so
 CPPFLAGS	+= $(CPPFLAGS_OMP)
 CFLAGS	+= $(CFLAGS_OMP)
 LDFLAGS	+= $(LDFLAGS_OMP)
