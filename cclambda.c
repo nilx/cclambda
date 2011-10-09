@@ -45,7 +45,7 @@
 
 #ifdef _OPENMP
 #ifdef OMPCC
-#define OMP_STR ", with OpenMP (" xstr(OMPCC) ")" 
+#define OMP_STR ", with OpenMP/" xstr(OMPCC) 
 #else
 #define OMP_STR ", with OpenMP"
 #endif

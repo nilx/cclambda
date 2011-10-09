@@ -126,7 +126,7 @@ void __lambda(float *const *__in, float *__RSTRCT __out)
 #endif
 
 #ifdef _OPENMP
-    DBG_PRINTF1("using OpenMP with %i threads\n", omp_get_max_threads());
+    DBG_PRINTF1("using %i OpenMP threads\n", omp_get_max_threads());
 #pragma omp parallel for default(shared) private(__n)
 #endif
     for (__n = 0; __n < NX * NY; __n++) {

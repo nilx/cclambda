@@ -147,16 +147,16 @@ multi-threading to process large images faster.
 
 To use OpenMP, you need to compile cclambda with OpenMP compiler
 options. The makefile contains a preset for gcc compilers, enabled
-with `make OMP=1`. You can uncomment options for other compilers (icc,
-suncc) in the makefile.
+with `OMP=1`. You can uncomment options for other compilers (icc,
+suncc) in the makefile. Then you must use cclambda with the same
+compiler and compiler options:
 
-Then you must use cclambda with the same compiler and compiler
-options:
+    make OMP=1
     CC=gcc CFLAGS="-O3 -fopenmp" ./cclambda a.png b.png "expr" > out.png
 
-Attempting to enable OpenMP when using cclambda without enabling it
-when cclambda is compiled, or with different compilers for compiling
-and using cclambda, will result in a link error.
+Attempts to use OpenMP with cclambda without enabling it when cclambda
+is compiled, or with different compilers for compiling and using
+cclambda, will result in a link error.
 
 # BUGS
 
