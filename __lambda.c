@@ -110,7 +110,7 @@ void __lambda(float *const *__in, float *__RSTRCT __out)
     const float *__RSTRCT __c = __in[2];
 #endif
 #if (__NBINPUT >= 4)
-    const float *__RSTRCT __d = __in[2];
+    const float *__RSTRCT __d = __in[3];
 #endif
 
     for (__n = 0; __n < NX * NY; __n++) {
