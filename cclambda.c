@@ -30,16 +30,27 @@
 #include "io_png.h"
 #include "cclambda_lib.h"
 
+/*
+ * macro stringification,
+ * cf. http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
+ */
+#define xstr(s) str(s)
+#define str(s) #s
+
 #ifdef STATIC
 #define STATIC_STR ", static build"
 #else
 #define STATIC_STR ""
 #endif
 
-#ifndef NDEBUG
-#define DEBUG_STR ", debug mode"
+#ifdef _OPENMP
+#ifdef OMPCC
+#define OMP_STR ", with OpenMP (" xstr(OMPCC) ")" 
 #else
-#define DEBUG_STR ""
+#define OMP_STR ", with OpenMP"
+#endif
+#else
+#define OMP_STR ""
 #endif
 
 #ifndef WITH_LIBTCC
@@ -50,8 +61,17 @@
 #define LIBTCC_SYNTAX "        cclambda img1.png img2.png ... 'expr'\n"
 #endif
 
+#ifndef NDEBUG
+#define DEBUG_STR ", debug mode"
+#else
+#define DEBUG_STR ""
+#endif
+
+#define BUILD_STR ", compiled " __DATE__ \
+    STATIC_STR OMP_STR LIBTCC_STR DEBUG_STR
+
 #define USAGE \
-    "cclambda, compiled " __DATE__ STATIC_STR DEBUG_STR LIBTCC_STR "\n" \
+    "cclambda" BUILD_STR "\n"						\
     "\n"                                                                \
     "syntax: cclambda [-c|-h]\n"                                        \
     LIBTCC_SYNTAX \

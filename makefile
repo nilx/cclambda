@@ -15,7 +15,8 @@ BIN	= cclambda
 # standard C compiler optimization options
 COPT	= 
 # complete C compiler options
-CFLAGS	= -ansi -pedantic -Wall -Wextra -pipe $(COPT)
+#CFLAGS	= -ansi -pedantic -Wall -Wextra -pipe $(COPT)
+CFLAGS	= $(COPT)
 # preprocessor options
 CPPFLAGS	= -DNDEBUG -DWITH_LIBTCC
 # linker options
@@ -27,6 +28,24 @@ ifdef STATIC
 LDFLAGS	= /usr/lib/libpng.a /usr/lib/libz.a /usr/lib/libtcc.a -ldl -lm
 CPPFLAGS	:= $(CPPFLAGS) -DSTATIC
 endif
+
+# openmp support
+ifdef OMP
+CPPFLAGS_OMP	= -DOMPCC=$(CC)
+# for gcc and gcc-based compilers
+CFLAGS_OMP	= -fopenmp
+LDFLAGS_OMP	= -lgomp
+# for icc
+#CFLAGS_OMP	= -openmp -openmp-lib=compat
+#LDFLAGS_OMP	= -openmp -openmp-lib=compat
+# for suncc
+#CFLAGS_OMP	= -xopenmp
+#LDFLAGS_OMP	= -lmtsk
+CPPFLAGS	+= $(CPPFLAGS_OMP)
+CFLAGS	+= $(CFLAGS_OMP)
+LDFLAGS	+= $(LDFLAGS_OMP)
+endif
+
 
 # default target: the binary executable programs
 default: $(BIN)

@@ -113,6 +113,9 @@ void __lambda(float *const *__in, float *__RSTRCT __out)
     const float *__RSTRCT __d = __in[3];
 #endif
 
+#ifdef _OPENMP
+#pragma omp parallel for default(shared) private(__n)
+#endif
     for (__n = 0; __n < NX * NY; __n++) {
         __out[__n] = (__EXPR);
     }

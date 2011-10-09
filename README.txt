@@ -67,7 +67,7 @@ For complex expression on large images, you can benefit from compiler
 optimization by specifying an external compiler and the compiling
 flags in the CC and CFLAGS environment variables:
 
-    CC=gcc CFLAGS="-O3" ./cclambda a.png b.png "expression" > out.png
+    CC=gcc CFLAGS="-O3" ./cclambda a.png b.png "expr" > out.png
 
 When cclambda is compiled in debug mode (without the NDEBUG macro),
 the -g option is automatically added to the compiler flags.
@@ -139,6 +139,25 @@ Sobel edge detector:
                  2 * A_(0,1) + A_(1,1) + A_(-1,1)
                  - 2 * A_(0,-1) + A_(1,-1) + A_(-1,-1))" > sobel.png
 
+# ADVANCED USE: MULTI-THREADING
+
+The cclambda loop processes every pixel with the same operations. This
+is well adapted to parallel processing, and cclambda can use OpenMP
+multi-threading to process large images faster.
+
+To use OpenMP, you need to compile cclambda with OpenMP compiler
+options. The makefile contains a preset for gcc compilers, enabled
+with `make OMP=1`. You can uncomment options for other compilers (icc,
+suncc) in the makefile.
+
+Then you must use cclambda with the same compiler and compiler
+options:
+    CC=gcc CFLAGS="-O3 -fopenmp" ./cclambda a.png b.png "expr" > out.png
+
+Attempting to enable OpenMP when using cclambda without enabling it
+when cclambda is compiled, or with different compilers for compiling
+and using cclambda, will result in a link error.
+
 # BUGS
 
 Some expressions trigger a segmentation fault on tcc_compile() or
@@ -150,7 +169,6 @@ still use compiler optimizations for the loop via CFLAGS at run time.
 
 # TODO
 
-Optional OpenMP support
 Float file format
 Compare compiler speed
 Compare speed with plambda
