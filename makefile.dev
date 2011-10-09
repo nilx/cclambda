@@ -9,10 +9,14 @@
 DATE	= $(shell date -u +%Y%m%d)
 RELEASE_TAG   = 0.$(DATE)
 
+CFLAGS_STRICT	= $(CFLAGS) -ansi -pedantic -Wall -Wextra
+
 .PHONY	: srcdoc lint beautify debug test release
+
 # source documentation
 srcdoc	: $(SRC) __lambda.c __lambda.h
 	doxygen doc/doxygen.conf
+
 # code cleanup
 beautify	: $(SRC) __lambda.c
 	for FILE in $^; do \
@@ -22,7 +26,8 @@ beautify	: $(SRC) __lambda.c
 		&& rm $$FILE.$$$$; \
 	done
 	$(MAKE) __lambda.h
-# static code analysis
+
+# static code analysis and strict build
 CLANG_OPTS	= --analyze -ansi
 SPLINT_OPTS	= -ansi-lib -weak -castfcnptr
 CPPFLAGS2	= -D__NBINPUT=4 -D__EXPR=A+B+C+D -D__NX=512 -D__NY=512
@@ -36,13 +41,17 @@ lint	: $(SRC) __lambda.c
 		splint $(SPLINT_OPTS) $(CPPFLAGS) $(CPPFLAGS2) -UNDEBUG \
 			-I. $$FILE || exit 1; done;
 	$(RM) *.plist
+	$(MAKE) -B CFLAGS="$(CFLAGS_STRICT)"
+
 # debug build
 debug	: $(SRC)
-	$(MAKE) CFLAGS="$(CFLAGS) -g" CPPFLAGS="$(CPPFLAGS) -UNDEBUG" \
-		LDFLAGS="$(LDFLAGS) -lefence"
+	$(MAKE) -B CFLAGS="$(CFLAGS) -g" \
+		CPPFLAGS="$(CPPFLAGS) -UNDEBUG" LDFLAGS="$(LDFLAGS) -lefence"
+
 # code tests
 test	: $(SRC) $(HDR)
 	sh -e test/run.sh && echo SUCCESS || ( echo ERROR; return 1)
+
 # release tarball
 release	: beautify lint test distclean
 	git archive --format=tar --prefix=$(PROJECT)-$(RELEASE_TAG)/ HEAD \

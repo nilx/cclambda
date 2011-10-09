@@ -37,12 +37,6 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-#ifdef STATIC
-#define STATIC_STR ", static build"
-#else
-#define STATIC_STR ""
-#endif
-
 #ifdef _OPENMP
 #ifdef OMPCC
 #define OMP_STR ", with OpenMP/" xstr(OMPCC) 
@@ -68,7 +62,7 @@
 #endif
 
 #define BUILD_STR ", compiled " __DATE__ \
-    STATIC_STR OMP_STR LIBTCC_STR DEBUG_STR
+    OMP_STR LIBTCC_STR DEBUG_STR
 
 #define USAGE \
     "cclambda" BUILD_STR "\n"						\

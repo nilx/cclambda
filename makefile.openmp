@@ -1,0 +1,29 @@
+# -*- makefile -*-
+# Copyright 2011 Nicolas Limare <nicolas.limare@cmla.ens-cachan.fr>
+#
+# Copying and distribution of this file, with or without
+# modification, are permitted in any medium without royalty provided
+# the copyright notice and this notice are preserved.  This file is
+# offered as-is, without any warranty.
+
+# openmp support
+
+# openmp flavour info
+CPPFLAGS_OMP	= -DOMPCC=$(CC)
+
+# for gcc and gcc-based compilers
+CFLAGS_OMP	= -fopenmp
+LDFLAGS_OMP	= -lgomp
+
+# for icc
+#CFLAGS_OMP	= -openmp
+#LDFLAGS_OMP	= -liomp5 -lpthread -L/path/to/libiomp5.so
+
+# for suncc
+#CFLAGS_OMP	= -xopenmp
+#LDFLAGS_OMP	= -lmtsk -L/path/to/libmtsk.so
+
+# add all this info to the build flags
+CPPFLAGS	+= $(CPPFLAGS_OMP)
+CFLAGS	+= $(CFLAGS_OMP)
+LDFLAGS	+= $(LDFLAGS_OMP)

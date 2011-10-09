@@ -12,10 +12,6 @@ _test_run() {
     done
 }
 
-_test_ldd() {
-    test "0" = "$(ldd cclambda | grep -c png)"
-}
-
 ################################################
 
 _log_init
@@ -34,20 +30,9 @@ echo "* compiler support"
 for CC in ; do # this test is very long and not crucial 
     which $CC || continue
     echo "* $CC compiler"
-    case $CC in
-	"gcc"|"g++")
-	    _log make -B CC=$CC ;;
-	*)
-	    _log make -B CC=$CC CFLAGS= ;;
-    esac
+    _log make -B CC=$CC
     _log _test_run
 done
-
-# static build
-_log make distclean
-_log make -B STATIC=1
-_log _test_run
-_log _test_ldd
 
 _log make distclean
 

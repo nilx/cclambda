@@ -12,39 +12,19 @@ OBJ	= $(SRC:.c=.o)
 # binary executable programs
 BIN	= cclambda
 
-# standard C compiler optimization options
+# C compiler optimization options
 COPT	= 
 # complete C compiler options
-CFLAGS	= -ansi -pedantic -Wall -Wextra -pipe $(COPT)
+CFLAGS	= $(COPT)
 # preprocessor options
 CPPFLAGS	= -DNDEBUG -DWITH_LIBTCC
 # linker options
 LDFLAGS	= -lpng -ltcc -ldl -lm
 
-# static build
-ifdef STATIC
-# link options to use the local libraries
-LDFLAGS	= /usr/lib/libpng.a /usr/lib/libz.a /usr/lib/libtcc.a -ldl -lm
-CPPFLAGS	:= $(CPPFLAGS) -DSTATIC
-endif
-
 # openmp support
 ifdef OMP
-CPPFLAGS_OMP	= -DOMPCC=$(CC)
-# for gcc and gcc-based compilers
-CFLAGS_OMP	= -fopenmp
-LDFLAGS_OMP	= -lgomp
-# for icc
-#CFLAGS_OMP	= -openmp
-#LDFLAGS_OMP	= -liomp5 -lpthread -L/path/to/libiomp5.so
-# for suncc
-#CFLAGS_OMP	= -xopenmp
-#LDFLAGS_OMP	= -lmtsk -L/path/to/libmtsk.so
-CPPFLAGS	+= $(CPPFLAGS_OMP)
-CFLAGS	+= $(CFLAGS_OMP)
-LDFLAGS	+= $(LDFLAGS_OMP)
+-include	makefile.openmp
 endif
-
 
 # default target: the binary executable programs
 default: $(BIN)
