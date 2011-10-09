@@ -9,8 +9,6 @@
 DATE	= $(shell date -u +%Y%m%d)
 RELEASE_TAG   = 0.$(DATE)
 
-CFLAGS_STRICT	= $(CFLAGS) -ansi -pedantic -Wall -Wextra
-
 .PHONY	: srcdoc lint beautify debug test release
 
 # source documentation
@@ -28,6 +26,7 @@ beautify	: $(SRC) __lambda.c
 	$(MAKE) __lambda.h
 
 # static code analysis and strict build
+CFLAGS_STRICT	= $(CFLAGS) -ansi -pedantic -Wall -Wextra
 CLANG_OPTS	= --analyze -ansi
 SPLINT_OPTS	= -ansi-lib -weak -castfcnptr
 CPPFLAGS2	= -D__NBINPUT=4 -D__EXPR=A+B+C+D -D__NX=512 -D__NY=512
