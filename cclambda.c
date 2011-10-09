@@ -39,7 +39,7 @@
 
 #ifdef _OPENMP
 #ifdef OMPCC
-#define OMP_STR ", with OpenMP/" xstr(OMPCC) 
+#define OMP_STR ", with OpenMP/" xstr(OMPCC)
 #else
 #define OMP_STR ", with OpenMP"
 #endif
@@ -65,7 +65,7 @@
     OMP_STR LIBTCC_STR DEBUG_STR
 
 #define USAGE \
-    "cclambda" BUILD_STR "\n"						\
+    "cclambda" BUILD_STR "\n"                                           \
     "\n"                                                                \
     "syntax: cclambda [-c|-h]\n"                                        \
     LIBTCC_SYNTAX \

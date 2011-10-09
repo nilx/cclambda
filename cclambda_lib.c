@@ -146,14 +146,14 @@ void loop_with_cc(const char *expr, int nbinput,
 #ifdef NDEBUG
     /* add "-DNDEBUG" */
     cflags_tmp = (char *) malloc((strlen(cflags) +
-				  + strlen(" -DNDEBUG")) * sizeof(char));
+                                  +strlen(" -DNDEBUG")) * sizeof(char));
     strcpy(cflags_tmp, cflags);
     strcat(cflags_tmp, " -DNDEBUG");
     cflags = cflags_tmp;
 #else
     /* add "-g" in debug mode */
-    cflags_tmp = (char *) malloc((strlen(cflags) 
-				  + strlen(" -g")) * sizeof(char));
+    cflags_tmp = (char *) malloc((strlen(cflags)
+                                  + strlen(" -g")) * sizeof(char));
     strcpy(cflags_tmp, cflags);
     strcat(cflags_tmp, " -g");
     cflags = cflags_tmp;
