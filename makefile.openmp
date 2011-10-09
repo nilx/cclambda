@@ -6,7 +6,7 @@
 # the copyright notice and this notice are preserved.  This file is
 # offered as-is, without any warranty.
 
-# openmp support
+# OpenMP support, included from the main makefile
 
 # openmp flavour info
 CPPFLAGS_OMP	= -DOMPCC=$(CC)

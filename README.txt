@@ -43,10 +43,10 @@ the usefulness of cclambda and the interest of the author.
 
 # COMPILATION
 
-Use the makefile, with `make`. You can embed libpng and libtcc in
-cclambda by a static build with `make STATIC=1`.
+Use the makefile, with `make`.
 
-Alternatively, you can manually compile cclambda with
+Alternatively, you can manually compile cclambda with:
+
     cc cclambda.c cclambda_lib.c io_png.c -DWITH_LIBTCC -DNDEBUG \
     -ltcc -lpng -ldl -o cclambda
 
@@ -68,9 +68,6 @@ optimization by specifying an external compiler and the compiling
 flags in the CC and CFLAGS environment variables:
 
     CC=gcc CFLAGS="-O3" ./cclambda a.png b.png "expr" > out.png
-
-When cclambda is compiled in debug mode (without the NDEBUG macro),
-the -g option is automatically added to the compiler flags.
 
 External compilation been tested on linux 2.6.32, amd64 architecture,
 with GNU ld 2.20.1 and the following compilers:
@@ -146,17 +143,44 @@ is well adapted to parallel processing, and cclambda can use OpenMP
 multi-threading to process large images faster.
 
 To use OpenMP, you need to compile cclambda with OpenMP compiler
-options. The makefile contains a preset for gcc compilers, enabled
-with `OMP=1`. You can uncomment options for other compilers (icc,
-suncc) in the makefile. Then you must use cclambda with the same
-compiler and compiler options:
+options. The makefile contains presets for gcc compilers, enabled with
+`make OMP=1`. Options for other compilers (icc, suncc) are commented
+in makefile.openmp.
 
-    make OMP=1
+Alternatively, you can manually compile cclambda with gcc and OpenMP
+support with:
+
+    gcc cclambda.c cclambda_lib.c io_png.c -DWITH_LIBTCC -DNDEBUG \
+    -fopenmp -ltcc -lpng -ldl -lgomp -o cclambda
+
+Then you must use cclambda with the same compiler and compiler options:
+
     CC=gcc CFLAGS="-O3 -fopenmp" ./cclambda a.png b.png "expr" > out.png
 
-Attempts to use OpenMP with cclambda without enabling it when cclambda
-is compiled, or with different compilers for compiling and using
-cclambda, will result in a link error.
+OpenMP will only work when cclambda is compiled and invoked with the
+same compiler and compiler options. But you can use an OpenMP-enabled
+cclambda with any compiler (including the internal libtcc) if you
+don't use parallel processing.
+
+# ADVANCED USE: DEBUG MODE
+
+Compiling cclambda in debug mode (without the NDEBUG macro) activates
+debugging options:
+* the compilation, execution and input/output time are measured;
+* the compiler choice (libtcc or an external compiler) is reported,
+  with the preprocessor symbols and the full compiler and linker
+  command-line when an external compiler is used;
+* the -g option is automatically added to the compiler flags;
+* the number of OpenMP threads is reported.
+
+You can compile in debug mode with the special make target
+"debug". This will also compile cclambda with the debug symbols and
+link with the Electric Fence memory debugging library.
+
+Alternatively, you can do it manually with:
+
+    cc -g cclambda.c cclambda_lib.c io_png.c -DWITH_LIBTCC -UNDEBUG \
+    -ltcc -lpng -ldl -o cclambda
 
 # BUGS
 

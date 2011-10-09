@@ -74,16 +74,16 @@ void loop_with_libtcc(const char *expr, int nbinput,
     tcc = tcc_new();
     tcc_set_warning(tcc, "all", 1);
     tcc_define_symbol(tcc, "__EXPR", expr);
-    tcc_define_symbol(tcc, "__NBINPUT", nbinput_s);
-    tcc_define_symbol(tcc, "__NX", nx_s);
-    tcc_define_symbol(tcc, "__NY", ny_s);
     DBG_PRINTF1("__EXPR\t'%s'\n", expr);
+    tcc_define_symbol(tcc, "__NBINPUT", nbinput_s);
     DBG_PRINTF1("__NBINPUT\t'%s'\n", nbinput_s);
+    tcc_define_symbol(tcc, "__NX", nx_s);
     DBG_PRINTF1("__NX\t'%s'\n", nx_s);
+    tcc_define_symbol(tcc, "__NY", ny_s);
     DBG_PRINTF1("__NY\t'%s'\n", ny_s);
-    tcc_set_output_type(tcc, TCC_OUTPUT_MEMORY);
 #ifdef NDEBUG
     tcc_define_symbol(tcc, "NDEBUG", "1");
+    DBG_PRINTF1("NDEBUG\t'%s'\n", "1");
 #else
     /*
      * missing in libtcc, see
@@ -91,6 +91,7 @@ void loop_with_libtcc(const char *expr, int nbinput,
      * tcc_enable_debug(tcc);
      */
 #endif
+    tcc_set_output_type(tcc, TCC_OUTPUT_MEMORY);
     if (0 != tcc_compile_string(tcc, (const char *) __lambda_c))
         ABORT("compilation error");
     /* get the compiled symbols */
