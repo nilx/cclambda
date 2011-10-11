@@ -6,7 +6,7 @@ EXPR="(A > .5 ? 1 : 0)"
 _test_run() {
     TEMPFILE=$(tempfile)
     ./cclambda - "$EXPR" < data/lena.png > ${TEMPFILE}
-    for CC in cc c99 gcc tcc nwcc clang icc pathcc suncc; do
+    for CC in cc c89 c99 gcc tcc nwcc clang icc pathcc suncc; do
 	which $CC || continue
 	CC=$CC ./cclambda - "$EXPR" < data/lena.png > ${TEMPFILE}
     done
@@ -26,7 +26,7 @@ _log make clean
 _log make
 
 echo "* compiler support"
-#for CC in cc c++ c99 gcc g++ tcc nwcc clang icc pathcc suncc; do
+#for CC in cc c++ c89 c99 gcc g++ tcc nwcc clang icc pathcc suncc; do
 for CC in ; do # this test is very long and not crucial 
     which $CC || continue
     echo "* $CC compiler"
