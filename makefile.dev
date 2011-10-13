@@ -9,7 +9,7 @@
 DATE	= $(shell date -u +%Y%m%d)
 RELEASE_TAG   = 0.$(DATE)
 
-CFLAGS_STRICT	= $(CFLAGS) -ansi -pedantic -Wall -Wextra
+CSTRICT	= -ansi -pedantic -Wall -Wextra
 
 .PHONY	: srcdoc lint beautify debug test release
 
@@ -28,17 +28,14 @@ beautify	: $(SRC) __lambda.c
 	$(MAKE) __lambda.h
 
 # static code analysis and strict build
-CPPFLAGS2	= -D__NBINPUT=4 -D__EXPR=A+B+C+D -D__NX=512 -D__NY=512
+CPPFLAGS2	= -DWITH_LIBTCC -D__NBINPUT=4 -D__EXPR=A+B+C+D -D__NX=512 -D__NY=512
 lint	: $(SRC) __lambda.c
-	for FILE in $^; do \
-		clang --analyze -ansi $(CPPFLAGS) $(CPPFLAGS2) \
-			-UNDEBUG -I. $$FILE || exit 1; \
-		splint -ansi-lib -weak  $(CPPFLAGS) $(CPPFLAGS2) \
-			-UNDEBUG -I. $$FILE || exit 1; \
-		cppcheck --enable=style --error-exitcode=1 $$FILE || exit 1; \
-	done;
+	clang --analyze -ansi $(CPPFLAGS2) -I. $^
+	splint -ansi-lib -weak  $(CPPFLAGS2) -I. $^
+	cppcheck --enable=style --error-exitcode=1 $^
 	$(RM) *.plist
-	$(MAKE) -B CFLAGS="$(CFLAGS_STRICT)"
+	$(MAKE) -B CFLAGS="$(CFLAGS) $(CSTRICT)"
+	@echo OK
 
 # debug build
 debug	: $(SRC)
