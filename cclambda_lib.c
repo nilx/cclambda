@@ -101,9 +101,9 @@ void loop_with_libtcc(const char *expr, int nbinput,
     if (-1 == tcc_relocate(tcc, tccmem))
         ABORT("relocation error");
     /* see the header of this file about compiler warnings */
-    /*@ -castfcnptr @*/
+    /*@ -castfcnptr @ */
     funcp = (lambda_fp) tcc_get_symbol(tcc, "__lambda");
-    /*@ =castfcnptr @*/
+    /*@ =castfcnptr @ */
     if (NULL == funcp)
         ABORT("missing __lambda() symbol");
     DBG_CLOCK_TOGGLE();
@@ -204,9 +204,9 @@ void loop_with_cc(const char *expr, int nbinput,
     if (NULL == dl)
         ABORT(dlerror());
     /* see the header of this file about compiler warnings */
-    /*@ -castfcnptr @*/
+    /*@ -castfcnptr @ */
     funcp = (lambda_fp) dlsym(dl, "__lambda");
-    /*@ =castfcnptr @*/
+    /*@ =castfcnptr @ */
     if (NULL == funcp)
         ABORT(dlerror());
     DBG_CLOCK_TOGGLE();

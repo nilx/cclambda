@@ -27,7 +27,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "io_png.h"
+#include "io_bds.h"
 #include "cclambda_lib.h"
 
 /*
@@ -52,7 +52,7 @@
 #define LIBTCC_SYNTAX ""
 #else
 #define LIBTCC_STR ", with libtcc"
-#define LIBTCC_SYNTAX "        cclambda img1.png img2.png ... 'expr'\n"
+#define LIBTCC_SYNTAX "        cclambda src src ... 'expr'\n"
 #endif
 
 #ifndef NDEBUG
@@ -69,12 +69,11 @@
     "\n"                                                                \
     "syntax: cclambda [-c|-h]\n"                                        \
     LIBTCC_SYNTAX \
-    "        CC=cc CFLAGS=-O3 cclambda img1.png img2.png ... 'expr'\n"  \
+    "        CC=cc CFLAGS=-O3 cclambda in in ... out 'expr'\n"          \
     "\n"                                                                \
     "        -c       dump loop code\n"                                 \
     "        -h       show this help\n"                                 \
-    "        imgN.png 1 to 4 input files\n"                             \
-    "                 '-' for stdin\n"                                  \
+    "        src      1 to 4 input data sources, '-' for stdin\n"       \
     "        no '__', ';' or '\'' allowed in expr\n"
 
 /**
@@ -85,7 +84,7 @@ int main(int argc, char **argv)
     float *in[4];
     float *out;
     size_t _nx, _ny;
-    size_t nx, ny;
+    size_t nx, ny, nc;
     char *expr;
     int nbinput;
     int i;
@@ -122,10 +121,13 @@ int main(int argc, char **argv)
     /* read input images */
     DBG_CLOCK_START();
     for (i = 0; i < nbinput; i++) {
-        in[i] = io_png_read_pp_flt(argv[i + 1], &nx, &ny, NULL,
-                                   IO_PNG_OPT_GRAY);
+        in[i] = io_bds_read_flt(argv[i + 1], &nx, &ny, &nc);
+        if (1 != nc) {
+            fprintf(stderr, "only one channel per image is handled\n");
+            return EXIT_FAILURE;
+        }
         if (0 == i) {
-            /* store thje first size */
+            /* store the first size */
             _nx = nx;
             _ny = ny;
         }
@@ -155,7 +157,7 @@ int main(int argc, char **argv)
 
     /* write output images */
     DBG_CLOCK_TOGGLE();
-    io_png_write_flt("-", out, nx, ny, 1);
+    io_bds_write_flt("-", out, nx, ny, 1);
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF1("%0.3fs\treading and writing the files\n", DBG_CLOCK_S());
 

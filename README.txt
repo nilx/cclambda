@@ -15,8 +15,8 @@
 
 # SYNOPSIS
 
-    ./cclambda a.png b.png "expression" > out.png
-    CC=gcc CFLAGS="-O3 -ffast-math" ./cclambda a.png b.png "expr" > out.png
+    ./cclambda a b "expression" > out
+    CC=gcc CFLAGS="-O3 -ffast-math" ./cclambda a b "expr" > out
 
 # DESCRIPTION
 
@@ -45,14 +45,13 @@ the usefulness of cclambda and the interest of the author.
 - a C compiler to build cclambda
 - libtcc for dynamic run-time compilation,
   if WITHOUT_LIBTCC is not defined at compile time
-- libpng+zlib to read and write PNG images
 
 # FILES
 
 - cclambda.c     cli handler
 - cclambda_lib.c main code
 - __lambda.h     dynamically compiled code template, from __lambda.c
-- io_png.{c,h}   libpng wrapper
+- io_bds.{c,h}   BDS stream read/write
 
 # COMPILATION
 
@@ -60,18 +59,17 @@ Use the makefile, with `make`.
 
 Alternatively, you can manually compile cclambda with:
 
-    cc cclambda.c cclambda_lib.c io_png.c -DWITH_LIBTCC -DNDEBUG \
-    -ltcc -lpng -ldl -o cclambda
+    cc cclambda.c cclambda_lib.c io_bds.c -DWITH_LIBTCC -DNDEBUG \
+    -ltcc -ldl -o cclambda
 
 # USAGE
 
     cclambda [-c|-h]
-    cclambda img1.png img2.png ... 'expr'
+    cclambda src src ... 'expr'
 
         -c       dump loop code
         -h       this help
-        imgN.png 1 to 4 input files
-                 '-' for stdin
+        src      1 to 4 input data sources, '-' for stdin
         no '__', ';' or ''' allowed in expr
 
 The default C compiler is the embedded libtcc. It is a fast C
@@ -80,7 +78,7 @@ For complex expression on large images, you can benefit from compiler
 optimization by specifying an external compiler and the compiling
 flags in the CC and CFLAGS environment variables:
 
-    CC=gcc CFLAGS="-O3" ./cclambda a.png b.png "expr" > out.png
+    CC=gcc CFLAGS="-O3" ./cclambda a b "expr" > out
 
 External compilation been tested on linux 2.6.32, amd64 architecture,
 with GNU ld 2.20.1 and the following compilers:
@@ -130,24 +128,24 @@ Access to pixels out of the image gives a 0 value.
 
 # EXAMPLES
 
-Sum two images:
+Sum two arrays:
 
-  cclambda a.png b.png "(A + B) / 2" > c.png
+  cclambda a b "(A + B) / 2" > c
 
 Add a gaussian to half of lena:
 
-  cclambda lena.png "(A / 2) + exp(-40. * sqrt(R2))" > out.png
+  cclambda lena "(A / 2) + exp(-40. * sqrt(R2))" > out
 
 Forward differences to compute the derivative in horizontal direction:
 
-  cclambda "A_(1,0) - A" < lena.png > out.png
+  cclambda "A_(1,0) - A" < lena > out
 
 Sobel edge detector:
 
-  cclambda lena.png "hypot(2 * A_(1,0) + A_(1,1) + A_(1,-1) 
+  cclambda lena "hypot(2 * A_(1,0) + A_(1,1) + A_(1,-1)
                  - 2 * A_(-1,0) + A_(-1,1) + A_(-1,-1),
                  2 * A_(0,1) + A_(1,1) + A_(-1,1)
-                 - 2 * A_(0,-1) + A_(1,-1) + A_(-1,-1))" > sobel.png
+                 - 2 * A_(0,-1) + A_(1,-1) + A_(-1,-1))" > sobel
 
 # ADVANCED USE
 
@@ -165,12 +163,12 @@ in makefile.openmp.
 Alternatively, you can manually compile cclambda with gcc and OpenMP
 support with:
 
-    gcc cclambda.c cclambda_lib.c io_png.c -DWITH_LIBTCC -DNDEBUG \
-    -fopenmp -ltcc -lpng -ldl -lgomp -o cclambda
+    gcc cclambda.c cclambda_lib.c io_bds.c -DWITH_LIBTCC -DNDEBUG \
+    -fopenmp -ltcc -ldl -lgomp -o cclambda
 
 Then you must use cclambda with the same compiler and compiler options:
 
-    CC=gcc CFLAGS="-O3 -fopenmp" ./cclambda a.png b.png "expr" > out.png
+    CC=gcc CFLAGS="-O3 -fopenmp" ./cclambda a b "expr" > out
 
 OpenMP will only work when cclambda is compiled and invoked with the
 same compiler and compiler options. But you can use an OpenMP-enabled
@@ -194,8 +192,8 @@ link with the Electric Fence memory debugging library.
 
 Alternatively, you can do it manually with:
 
-    cc -g cclambda.c cclambda_lib.c io_png.c -DWITH_LIBTCC -UNDEBUG \
-    -ltcc -lpng -ldl -o cclambda
+    cc -g cclambda.c cclambda_lib.c io_bds.c -DWITH_LIBTCC -UNDEBUG \
+    -ltcc -ldl -o cclambda
 
 # BUGS
 

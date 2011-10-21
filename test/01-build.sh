@@ -5,10 +5,10 @@
 EXPR="(A > .5 ? 1 : 0)"
 _test_run() {
     TEMPFILE=$(tempfile)
-    ./cclambda - "$EXPR" < data/lena.png > ${TEMPFILE}
+    ./rw data/lena_gray.png - | ./cclambda - "$EXPR" > ${TEMPFILE}
     for CC in cc c89 c99 gcc tcc nwcc clang icc pathcc suncc; do
 	which $CC || continue
-	CC=$CC ./cclambda - "$EXPR" < data/lena.png > ${TEMPFILE}
+	./rw data/lena_gray.png - | CC=$CC ./cclambda - "$EXPR" > ${TEMPFILE}
     done
 }
 

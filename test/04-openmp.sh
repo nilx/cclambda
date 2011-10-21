@@ -24,9 +24,9 @@ _test_openmp_run() {
     export CC=$CC
     export CFLAGS="$CFLAGS"
     export OMP_NUM_THREADS=4
-    test "1" = "$( ( ./cclambda data/lena.png \
-        '(A > .5 ? 1 : 0)' > /dev/null ) \
-        2>&1 | grep -c 'using 4 OpenMP threads')"
+    test "1" = "$( ( ./rw data/lena_gray.png - \
+                     | ./cclambda - '(A > .5 ? 1 : 0)' > /dev/null ) 2>&1 \
+                  | grep -c 'using 4 OpenMP threads')"
     unset CC CFLAGS OMP_NUM_THREADS
 }
 

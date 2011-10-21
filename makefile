@@ -6,7 +6,7 @@
 # offered as-is, without any warranty.
 
 # source code, C language
-SRC	= cclambda.c cclambda_lib.c io_png.c
+SRC	= cclambda.c cclambda_lib.c io_bds.c
 # object files (partial compilation)
 OBJ	= $(SRC:.c=.o)
 # binary executable programs
@@ -19,7 +19,7 @@ CFLAGS	= $(COPT)
 # preprocessor options
 CPPFLAGS	= -DNDEBUG -DWITH_LIBTCC
 # linker options
-LDFLAGS	= -lpng -ltcc -ldl -lm
+LDFLAGS	= -ltcc -ldl -lm
 
 # openmp support
 ifdef OMP
@@ -42,7 +42,7 @@ cclambda.o	: cclambda.c __lambda.h
 	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 # final link
-cclambda	: cclambda.o cclambda_lib.o io_png.o
+cclambda	: cclambda.o cclambda_lib.o io_bds.o
 	$(CC) $^ $(LDFLAGS) -o $@
 
 # cleanup
