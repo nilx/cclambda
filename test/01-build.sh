@@ -5,14 +5,8 @@
 EXPR="(A > .5 ? 1 : 0)"
 _test_run() {
     TEMPFILE=$(tempfile)
-    CC=$1
-    if [ "libtcc" = "$CC" ]; then
-	./test/rw data/lena_gray.png - \
-	    | ./cclambda - "$EXPR" > ${TEMPFILE}
-    else
-	./test/rw data/lena_gray.png - \
-	    | CC=$CC ./cclambda - "$EXPR" > ${TEMPFILE}
-    fi
+    ./test/rw data/lena_gray.png - \
+	| CC=$1 ./cclambda - "$EXPR" > ${TEMPFILE}
 }
 
 ################################################

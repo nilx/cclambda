@@ -147,12 +147,15 @@ int main(int argc, char **argv)
 #ifndef WITH_LIBTCC
     loop_with_cc(expr, nbinput, in, out, nx, ny);
 #else
-    if (NULL == getenv("CC") || '\0' == getenv("CC")[0])
-        /* no CC, use libtcc */
-        loop_with_libtcc(expr, nbinput, in, out, nx, ny);
-    else
-        /* use local CC */
-        loop_with_cc(expr, nbinput, in, out, nx, ny);
+    {
+	char *cc = getenv("CC");
+	if (NULL == cc || '\0' == cc[0] || 0 == strcmp("libtcc", cc))
+	    /* no CC, use libtcc */
+	    loop_with_libtcc(expr, nbinput, in, out, nx, ny);
+	else
+	    /* use local CC */
+	    loop_with_cc(expr, nbinput, in, out, nx, ny);
+    }
 #endif
 
     /* write output images */
