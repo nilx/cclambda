@@ -70,10 +70,13 @@ void loop_with_libtcc(const char *expr, int nbinput,
     lambda_fp *funcpp;
 
     DBG_PRINTF0("compile with embedded libtcc\n");
+
+    /* format the cpp macros as text */
     snprintf(nbinput_s, 16, "%i", nbinput);
     snprintf(nx_s, 16, "%lu", nx);
     snprintf(ny_s, 16, "%lu", ny);
-    /* compile lambda */
+
+    /* compile with libtcc */
     DBG_CLOCK_START();
     tcc = tcc_new();
     tcc_set_warning(tcc, "all", 1);
@@ -92,13 +95,14 @@ void loop_with_libtcc(const char *expr, int nbinput,
     /*
      * missing in libtcc, see
      * http://repo.or.cz/w/tinycc.git/commit/5f99fe2f
-     * tcc_enable_debug(tcc);
      */
+    /* tcc_enable_debug(tcc); */
 #endif
     tcc_set_output_type(tcc, TCC_OUTPUT_MEMORY);
     if (0 != tcc_compile_string(tcc, (const char *) __lambda_c))
         ABORT("compilation error");
-    /* get the compiled symbols */
+
+    /* get the compiled symbol */
     tccmem = malloc((size_t) tcc_relocate(tcc, NULL));
     if (NULL == tccmem)
         ABORT("allocation error");
@@ -110,12 +114,13 @@ void loop_with_libtcc(const char *expr, int nbinput,
         ABORT("missing __lambda_fp() symbol");
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF1("%0.3fs\tcompiling the code with libtcc\n", DBG_CLOCK_S());
+
     /* run __lambda(in, out); */
     DBG_CLOCK_START();
     (**funcpp) (in, out);
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF1("%0.3fs\tprocessing the loop\n", DBG_CLOCK_S());
-    /* cleanup */
+
     tcc_delete(tcc);
     free(tccmem);
     return;
