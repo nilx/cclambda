@@ -7,7 +7,7 @@ _test_memcheck() {
     echo "( CC=cc valgrind --tool=memcheck $@ > /dev/null ) 2>&1 \
                    | grep -c 'LEAK'"
     test "0" = "$( ( CC=cc valgrind --tool=memcheck \
-                   ./rw data/lena_gray.png - | ./cclambda - '(A > .5 ? 1 : 0)' > /dev/null ) \
+                   ./test/rw data/lena_gray.png - | ./cclambda - '(A > .5 ? 1 : 0)' > /dev/null ) \
                    2>&1 | grep -c 'LEAK' )"
 }
 

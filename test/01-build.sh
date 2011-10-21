@@ -7,10 +7,10 @@ _test_run() {
     TEMPFILE=$(tempfile)
     CC=$1
     if [ "libtcc" = "$CC" ]; then
-	./rw data/lena_gray.png - \
+	./test/rw data/lena_gray.png - \
 	    | ./cclambda - "$EXPR" > ${TEMPFILE}
     else
-	./rw data/lena_gray.png - \
+	./test/rw data/lena_gray.png - \
 	    | CC=$CC ./cclambda - "$EXPR" > ${TEMPFILE}
     fi
 }

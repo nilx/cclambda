@@ -7,14 +7,14 @@ OUT=/dev/null
 
 _test_expr() {
     EXPR=$1
-    ./rw $IN - | ./cclambda - "$EXPR" > $OUT
-    ./rw $IN - | CC=gcc ./cclambda - "$EXPR" > $OUT
-    ./rw $IN - | CC=gcc CFLAGS=-O3 ./cclambda - "$EXPR" > $OUT
+    ./test/rw $IN - | ./cclambda - "$EXPR" > $OUT
+    ./test/rw $IN - | CC=gcc ./cclambda - "$EXPR" > $OUT
+    ./test/rw $IN - | CC=gcc CFLAGS=-O3 ./cclambda - "$EXPR" > $OUT
 }
 
 _test_canny() {
-    (./rw $IN - | ./cclambda - "hypot(A_(1,0) - A, A_(0,1) - A)"; \
-     ./rw $IN - | ./cclambda - "atan2(A_(0,1) - A, A_(1,0) - A) / (2 * M_PI) + .5" ) \
+    (./test/rw $IN - | ./cclambda - "hypot(A_(1,0) - A, A_(0,1) - A)"; \
+     ./test/rw $IN - | ./cclambda - "atan2(A_(0,1) - A, A_(1,0) - A) / (2 * M_PI) + .5" ) \
      | ./cclambda - - \
 	"((A > .1) && \
           ((((fabs(B - .5) < .125) || \
