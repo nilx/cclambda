@@ -9,7 +9,7 @@
 DATE	= $(shell date -u +%Y%m%d)
 RELEASE_TAG   = 0.$(DATE)
 
-CSTRICT	= -ansi -pedantic -Wall -Wextra
+CSTRICT	= -ansi -pedantic -Wall -Wextra -Werror
 
 .PHONY	: srcdoc lint beautify debug test release
 

@@ -19,10 +19,13 @@
  *
  * @author Nicolas Limare <nicolas.limare@cmla.ens-cachan.fr>
  *
-
-     * see the RATIONALE section of
-     * http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
-
+ * We have to get the compiled loop function via double pointer
+ * indirection because of conflicts between ISO C and POSIX standards.
+ * cf. "RATIONALE" section of
+ *   http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
+ * and "Solving the function pointer problem on POSIX systems" section of
+ *   http://en.wikipedia.org/wiki/Dynamic_loading
+ *
  * @todo: use POSIX execvp() to check exec result
  */
 
@@ -63,7 +66,8 @@ void loop_with_libtcc(const char *expr, int nbinput,
     TCCState *tcc;
     void *tccmem;
     char nbinput_s[16], nx_s[16], ny_s[16];
-    lambda_fp funcp;
+    /* get the loop function via double pointer indirection */
+    lambda_fp *funcpp;
 
     DBG_PRINTF0("compile with embedded libtcc\n");
     snprintf(nbinput_s, 16, "%i", nbinput);
@@ -100,17 +104,15 @@ void loop_with_libtcc(const char *expr, int nbinput,
         ABORT("allocation error");
     if (-1 == tcc_relocate(tcc, tccmem))
         ABORT("relocation error");
-    /* see the header of this file about compiler warnings */
-    /*@ -castfcnptr @ */
-    funcp = (lambda_fp) tcc_get_symbol(tcc, "__lambda");
-    /*@ =castfcnptr @ */
-    if (NULL == funcp)
-        ABORT("missing __lambda() symbol");
+    /* get the loop function via double pointer indirection */
+    funcpp = (lambda_fp *) tcc_get_symbol(tcc, "__lambda_fp");
+    if (NULL == funcpp)
+        ABORT("missing __lambda_fp() symbol");
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF1("%0.3fs\tcompiling the code with libtcc\n", DBG_CLOCK_S());
     /* run __lambda(in, out); */
     DBG_CLOCK_START();
-    (*funcp) (in, out);
+    (**funcpp) (in, out);
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF1("%0.3fs\tprocessing the loop\n", DBG_CLOCK_S());
     /* cleanup */
@@ -135,7 +137,7 @@ void loop_with_cc(const char *expr, int nbinput,
     FILE *fd;
     char cmd[512];
     void *dl;
-    lambda_fp funcp;
+    lambda_fp *funcpp;
 
     DBG_PRINTF0("compile with external compiler\n");
     /* gather local settings */
@@ -203,17 +205,15 @@ void loop_with_cc(const char *expr, int nbinput,
     dl = dlopen(fname_so, RTLD_NOW);
     if (NULL == dl)
         ABORT(dlerror());
-    /* see the header of this file about compiler warnings */
-    /*@ -castfcnptr @ */
-    funcp = (lambda_fp) dlsym(dl, "__lambda");
-    /*@ =castfcnptr @ */
-    if (NULL == funcp)
+    /* get the loop function via double pointer indirection */
+    funcpp = (lambda_fp *) dlsym(dl, "__lambda_fp");
+    if (NULL == funcpp)
         ABORT(dlerror());
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF2("%0.3fs\tcompiling the code with %s\n", DBG_CLOCK_S(), cc);
     /* run __lambda(in, out); */
     DBG_CLOCK_START();
-    (*funcp) (in, out);
+    (**funcpp) (in, out);
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF1("%0.3fs\tprocessing the loop\n", DBG_CLOCK_S());
     /* cleanup */

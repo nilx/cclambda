@@ -134,3 +134,15 @@ void __lambda(float *const *__in, float *__RSTRCT __out)
     }
     return;
 }
+
+/**
+ * @brief pointer to the compiled __lambda() function
+ *
+ * We have to maintain this pointer because of conflicts between ISO C
+ * and POSIX standards.
+ * cf. "RATIONALE" section of
+ *   http://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
+ * and "Solving the function pointer problem on POSIX systems" section of
+ *   http://en.wikipedia.org/wiki/Dynamic_loading
+ */
+void (*__lambda_fp) (float *const *, float *) = &__lambda;
