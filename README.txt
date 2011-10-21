@@ -206,9 +206,9 @@ still use compiler optimizations for the loop via CFLAGS at run time.
 
 # TODO
 
-Float file format
 Compare compiler speed
 Compare speed with plambda
+Windows version
 More macros
 RGB solution
 

@@ -123,61 +123,17 @@ void loop_with_libtcc(const char *expr, int nbinput,
 #endif                          /* WITH_LIBTCC */
 
 /**
- * use the local CC compiler to build the lambda loop
+ * compile with the local CC
  */
-void loop_with_cc(const char *expr, int nbinput,
-                  float *const *in, float *out, size_t nx, size_t ny)
+static void _compile_with_cc(const char *cc, const char *cflags,
+                             const char *expr, int nbinput,
+                             size_t nx, size_t ny,
+                             const char *fname_c, const char *fname_o)
 {
-    char *cc, *cflags, *cflags_tmp = NULL;
-    char cflags_empty[] = "";
-    char fname[] = "/tmp/cclambda_XXXXXX";
-    char fname_c[] = "/tmp/cclambda_XXXXXX.c";
-    char fname_o[] = "/tmp/cclambda_XXXXXX.o";
-    char fname_so[] = "/tmp/cclambda_XXXXXX.so";
     FILE *fd;
     char cmd[512];
-    void *dl;
-    lambda_fp *funcpp;
 
-    DBG_PRINTF0("compile with external compiler\n");
-    /* gather local settings */
-    cc = getenv("CC");
-    if (NULL == cc)
-        ABORT("missing CC environment variable");
-    cflags = getenv("CFLAGS");
-    if (NULL == cflags)
-        cflags = cflags_empty;
-#ifdef NDEBUG
-    /* add "-DNDEBUG" */
-    cflags_tmp = (char *) malloc((strlen(cflags) +
-                                  +strlen(" -DNDEBUG")) * sizeof(char));
-    strcpy(cflags_tmp, cflags);
-    strcat(cflags_tmp, " -DNDEBUG");
-    cflags = cflags_tmp;
-#else
-    /* add "-g" in debug mode */
-    cflags_tmp = (char *) malloc((strlen(cflags)
-                                  + strlen(" -g")) * sizeof(char));
-    strcpy(cflags_tmp, cflags);
-    strcat(cflags_tmp, " -g");
-    cflags = cflags_tmp;
-#endif
-    DBG_PRINTF1("CC\t'%s'\n", cc);
-    DBG_PRINTF1("CFLAGS\t'%s'\n", cflags);
-    /* temporary source and object files */
-    fd = fdopen(mkstemp(fname), "w");
-    (void) fwrite((void *) __lambda_c, sizeof(char), __lambda_c_len, fd);
-    fclose(fd);
-    /* add suffix for compiler comfort */
-    strcpy(fname_c, fname);
-    strcat(fname_c, ".c");
-    rename(fname, fname_c);
-    strcpy(fname_o, fname);
-    strcat(fname_o, ".o");
-    strcpy(fname_so, fname);
-    strcat(fname_so, ".so");
     /* compile */
-    DBG_CLOCK_START();
     /* TODO: insert warnings */
     if (0 == system(NULL))
         ABORT("no command processor");
@@ -192,6 +148,18 @@ void loop_with_cc(const char *expr, int nbinput,
     if (NULL == fd)
         ABORT("compilation error");
     fclose(fd);
+
+    return;
+}
+
+/**
+ * link with the local linker
+ */
+static void _link_with_cc(const char *fname_o, const char *fname_so)
+{
+    FILE *fd;
+    char cmd[512];
+
     /* link */
     snprintf(cmd, 512, "ld -shared -o %s %s", fname_so, fname_o);
     DBG_PRINTF1("cmd\t'%s'\n", cmd);
@@ -201,6 +169,18 @@ void loop_with_cc(const char *expr, int nbinput,
     if (NULL == fd)
         ABORT("compilation error");
     fclose(fd);
+
+    return;
+}
+
+/**
+ * run the loop with dlopen
+ */
+static void _run_with_cc(const char *fname_so, float *const *in, float *out)
+{
+    void *dl;
+    lambda_fp *funcpp;
+
     /* dynamic load */
     dl = dlopen(fname_so, RTLD_NOW);
     if (NULL == dl)
@@ -209,18 +189,82 @@ void loop_with_cc(const char *expr, int nbinput,
     funcpp = (lambda_fp *) dlsym(dl, "__lambda_fp");
     if (NULL == funcpp)
         ABORT(dlerror());
+    /* run __lambda(in, out); */
+    (**funcpp) (in, out);
+    dlclose(dl);
+
+    return;
+}
+
+/**
+ * use the local CC compiler to build and run the lambda loop
+ */
+void loop_with_cc(const char *expr, int nbinput,
+                  float *const *in, float *out, size_t nx, size_t ny)
+{
+    char fname[] = "/tmp/cclambda_XXXXXX";
+    char fname_c[] = "/tmp/cclambda_XXXXXX.c";
+    char fname_o[] = "/tmp/cclambda_XXXXXX.o";
+    char fname_so[] = "/tmp/cclambda_XXXXXX.so";
+    FILE *fd;
+    char *cc, *cflags, *cflags_tmp = NULL;
+    char cflags_empty[] = "";
+
+    DBG_PRINTF0("compile with external compiler\n");
+
+    /* gather local settings */
+    cc = getenv("CC");
+    if (NULL == cc || '\0' == cc[0])
+        ABORT("missing CC environment variable");
+    cflags = getenv("CFLAGS");
+    if (NULL == cflags)
+        cflags = cflags_empty;
+#ifdef NDEBUG
+    /* add "-DNDEBUG" */
+    cflags_tmp = (char *) malloc((strlen(cflags) +
+                                  +strlen(" -DNDEBUG")) * sizeof(char));
+    strcpy(cflags_tmp, cflags);
+    strcat(cflags_tmp, " -DNDEBUG");
+#else
+    /* add "-g" in debug mode */
+    cflags_tmp = (char *) malloc((strlen(cflags)
+                                  + strlen(" -g")) * sizeof(char));
+    strcpy(cflags_tmp, cflags);
+    strcat(cflags_tmp, " -g");
+#endif
+    cflags = cflags_tmp;
+    DBG_PRINTF1("CC\t'%s'\n", cc);
+    DBG_PRINTF1("CFLAGS\t'%s'\n", cflags);
+
+    /* temporary source file */
+    fd = fdopen(mkstemp(fname), "w");
+    (void) fwrite((void *) __lambda_c, sizeof(char), __lambda_c_len, fd);
+    fclose(fd);
+    /* add suffixes for compiler comfort */
+    strcpy(fname_c, fname);
+    strcat(fname_c, ".c");
+    rename(fname, fname_c);
+    strcpy(fname_o, fname);
+    strcat(fname_o, ".o");
+    strcpy(fname_so, fname);
+    strcat(fname_so, ".so");
+
+    /* compile the C code */
+    DBG_CLOCK_START();
+    _compile_with_cc(cc, cflags, expr, nbinput, nx, ny, fname_c, fname_o);
+    /* link into a shared library */
+    _link_with_cc(fname_o, fname_so);
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF2("%0.3fs\tcompiling the code with %s\n", DBG_CLOCK_S(), cc);
-    /* run __lambda(in, out); */
+    /* run the loop */
     DBG_CLOCK_START();
-    (**funcpp) (in, out);
+    _run_with_cc(fname_so, in, out);
     DBG_CLOCK_TOGGLE();
     DBG_PRINTF1("%0.3fs\tprocessing the loop\n", DBG_CLOCK_S());
-    /* cleanup */
-    dlclose(dl);
+
+    free(cflags_tmp);
     remove(fname_c);
     remove(fname_o);
     remove(fname_so);
-    free(cflags_tmp);
     return;
 }
