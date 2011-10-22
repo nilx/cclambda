@@ -188,9 +188,12 @@ static void _io_bds_read_sig(FILE * fp)
     char sig[_IO_BDS_SIG_LEN];
     size_t i;
 
-    if (_IO_BDS_SIG_LEN != fread(&sig, sizeof(char), _IO_BDS_SIG_LEN, fp))
-        _IO_BDS_ABORT_ERR("read error");
+    /* read with getc() to accomodate previous ungetc() */
+    for (i = 0; i < _IO_BDS_SIG_LEN; i++)
+        if (EOF == (sig[i] = getc(fp)))
+            _IO_BDS_ABORT_ERR("read error");
 
+    /* check the signature */
     for (i = 0; i < _IO_BDS_SIG_BASE_LEN; i++)
         if (_io_bds_sig[i] != sig[i])
             _IO_BDS_ABORT("data is not a correctly formatted BDS");
@@ -349,7 +352,6 @@ float *io_bds_read_flt(const char *fname,
             _IO_BDS_ABORT_ERR("failed to open file");
         fputs(_IO_BDS_FILE_WARNING, stderr);
     }
-    setbuf(fp, NULL);
 
     /* read and check the signature and header */
     _io_bds_read_sig(fp);

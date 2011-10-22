@@ -6,7 +6,7 @@ EXPR="(A > .5 ? 1 : 0)"
 _test_run() {
     TEMPFILE=$(tempfile)
     ./test/rw data/lena_gray.png - \
-	| CC=$1 ./cclambda - "$EXPR" > ${TEMPFILE}
+	| CC=$1 ./cclambda "$EXPR" > ${TEMPFILE}
 }
 
 ################################################

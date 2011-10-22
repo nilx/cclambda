@@ -15,18 +15,18 @@
 
 # SYNOPSIS
 
-    ./cclambda a b "expression" > out
-    CC=gcc CFLAGS="-O3 -ffast-math" ./cclambda a b "expr" > out
+    ./cclambda "expression" < in > out
+    CC=gcc CFLAGS="-O3 -ffast-math" ./cclambda "expr" < in > out
 
 # DESCRIPTION
 
 cclambda applies an expression to all the pixels of a collection of
-images. The goal of cclambda is similar to Enric Meinhardt's
+2D arrays. The goal of cclambda is similar to Enric Meinhardt's
 plambda[1], and cclambda was started after thinking about possible
 variations around plambda. The main differences between the two codes
 is that cclambda implements no expression parser, stack or dynamic
 instruction handling; instead, cclambda writes the expression in a
-plain C code context, compiles it and execute the result.
+plain C code context, compiles it and executes the result.
 
 cclambda is less formal and elegant than plambda, it's on the "dirty
 hack" side of the force. I hope cclambda can be faster than plambda, or
@@ -65,12 +65,12 @@ Alternatively, you can manually compile cclambda with:
 # USAGE
 
     cclambda [-c|-h]
-    cclambda src src ... 'expr'
+    cclambda 'expr' < in1 in2 ... > out
 
         -c       dump loop code
         -h       this help
-        src      1 to 4 input data sources, '-' for stdin
-        no '__', ';' or ''' allowed in expr
+        inN      1 to 4 input data sources
+        expr     C expression, no '__', ';' or ''' allowed
 
 The default C compiler is the embedded libtcc. It is a fast C
 compiling tool with few optimizations and some bugs (see BUGS).
@@ -78,7 +78,7 @@ For complex expression on large images, you can benefit from compiler
 optimization by specifying an external compiler and the compiling
 flags in the CC and CFLAGS environment variables:
 
-    CC=gcc CFLAGS="-O3" ./cclambda a b "expr" > out
+    CC=gcc CFLAGS="-O3" ./cclambda "expr" < in > out
 
 External compilation been tested on linux 2.6.32, amd64 architecture,
 with GNU ld 2.20.1 and the following compilers:
@@ -101,30 +101,27 @@ The expression can contain any C code valid in this context. The libc
 math.h header is included, so all the constants and functions defined
 in this header (on your system) are available.
 
-The input images are read as grayscale float arrays with values in
-[0,1]. They must all have the same size. The output image is written
-from a grayscale float array with values in [0,1]. You can refer to the
-input image values as A, B, C and D. No more than 4 input images are
-(currently) supported.
+You can refer to the input float arrays as A, B, C and D. No more than
+4 input arrays are (currently) supported.
 
-The image width and height are available as the NX and NY macros. You
-van also access the current horizontal and vertical coordinates via
+The array width and height are available as the NX and NY macros. You
+can also access the current horizontal and vertical coordinates via
 the I and J macros, in [0,NX[ ans [0,NY[.
 
 Some other convenience macros are available:
-- N  number of pixels in the image
-- R2 square normalized distance to the center of the image
-- T  angle from the center of the image
+- N  number of pixels in the array
+- R2 square normalized distance to the center of the array
+- T  angle from the center of the array
 
-For every image, some pixel position modifiers are available:
-A_(dx, dy) is the value of the image A on the pixel I+dx, _J+dy.
+For every array item, some position modifiers are available:
+A_(dx, dy) is the value of the array A on the position I+dx, _J+dy.
 
-A value of pixel (I,J)
-A_(0,0) value of pixel (I,J)
-A_(1,0) value of pixel (I+1,J)
-A_(-1,-1) value of pixel (I-1,J-1)
+A value at position (I,J)
+A_(0,0) value at position (I,J)
+A_(1,0) value at position (I+1,J)
+A_(-1,-1) value at position (I-1,J-1)
 
-Access to pixels out of the image gives a 0 value.
+Access out of the arrays gives a 0 value.
 
 # EXAMPLES
 
@@ -134,7 +131,7 @@ Sum two arrays:
 
 Add a gaussian to half of lena:
 
-  cclambda lena "(A / 2) + exp(-40. * sqrt(R2))" > out
+  cclambda "(A / 2) + exp(-40. * sqrt(R2))" < lena > out
 
 Forward differences to compute the derivative in horizontal direction:
 
@@ -142,10 +139,10 @@ Forward differences to compute the derivative in horizontal direction:
 
 Sobel edge detector:
 
-  cclambda lena "hypot(2 * A_(1,0) + A_(1,1) + A_(1,-1)
-                 - 2 * A_(-1,0) + A_(-1,1) + A_(-1,-1),
-                 2 * A_(0,1) + A_(1,1) + A_(-1,1)
-                 - 2 * A_(0,-1) + A_(1,-1) + A_(-1,-1))" > sobel
+  cat lena | cclambda "hypot(2 * A_(1,0) + A_(1,1) + A_(1,-1)
+                       - 2 * A_(-1,0) + A_(-1,1) + A_(-1,-1),
+                       2 * A_(0,1) + A_(1,1) + A_(-1,1)
+                       - 2 * A_(0,-1) + A_(1,-1) + A_(-1,-1))" > sobel
 
 # ADVANCED USE
 
@@ -168,7 +165,7 @@ support with:
 
 Then you must use cclambda with the same compiler and compiler options:
 
-    CC=gcc CFLAGS="-O3 -fopenmp" ./cclambda a b "expr" > out
+    CC=gcc CFLAGS="-O3 -fopenmp" ./cclambda "expr" < in > out
 
 OpenMP will only work when cclambda is compiled and invoked with the
 same compiler and compiler options. But you can use an OpenMP-enabled

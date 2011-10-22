@@ -6,7 +6,7 @@ _test_memcheck() {
 #libtcc has a memory leak problem
     test "0" = "$( ( ./test/rw data/lena_gray.png - \
                      | CC=$1 valgrind --tool=memcheck \
-                       ./cclambda - '(A > .5 ? 1 : 0)' > /dev/null ) 2>&1 \
+                       ./cclambda '(A > .5 ? 1 : 0)' > /dev/null ) 2>&1 \
                    | grep -c 'LEAK' )"
 }
 

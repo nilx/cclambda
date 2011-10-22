@@ -52,7 +52,7 @@
 #define LIBTCC_SYNTAX ""
 #else
 #define LIBTCC_STR ", with libtcc"
-#define LIBTCC_SYNTAX "        cclambda src src ... 'expr'\n"
+#define LIBTCC_SYNTAX "        cclambda 'expr'\n"
 #endif
 
 #ifndef NDEBUG
@@ -68,13 +68,14 @@
     "cclambda" BUILD_STR "\n"                                           \
     "\n"                                                                \
     "syntax: cclambda [-c|-h]\n"                                        \
-    LIBTCC_SYNTAX \
-    "        CC=cc CFLAGS=-O3 cclambda in in ... out 'expr'\n"          \
+    LIBTCC_SYNTAX                                                       \
+    "        CC=cc CFLAGS=-O3 cclambda 'expr'\n"                        \
     "\n"                                                                \
     "        -c       dump loop code\n"                                 \
     "        -h       show this help\n"                                 \
-    "        src      1 to 4 input data sources, '-' for stdin\n"       \
-    "        no '__', ';' or '\'' allowed in expr\n"
+    "        expr     C expression, no '__', ';' or '\'' allowed\n"     \
+    "\n"                                                                \
+    "usage:  cat foo bar | cclambda 'expr' > baz\n"
 
 /**
  * command-line handler
@@ -88,26 +89,25 @@ int main(int argc, char **argv)
     char *expr;
     int nbinput;
     int i;
+    int c;
 
     /* validate params */
-    if (argc == 2) {
-        if (0 == strcmp(argv[1], "-c")) {
-            (void) fwrite((void *) __lambda_c, sizeof(char), __lambda_c_len,
-                          stdout);
-            exit(EXIT_SUCCESS);
-        }
-        else if (0 == strcmp(argv[1], "-h")) {
-            fprintf(stdout, USAGE);
-            exit(EXIT_SUCCESS);
-        }
-    }
-    nbinput = argc - 2;
-    if (nbinput < 1 || nbinput > 4) {
+    if (2 != argc) {
         fprintf(stderr, USAGE);
         exit(EXIT_FAILURE);
     }
+    if (0 == strcmp(argv[1], "-h")) {
+        fprintf(stdout, USAGE);
+        exit(EXIT_SUCCESS);
+    }
+    if (0 == strcmp(argv[1], "-c")) {
+        (void) fwrite((void *) __lambda_c, sizeof(char), __lambda_c_len,
+                      stdout);
+        exit(EXIT_SUCCESS);
+    }
 
-    expr = argv[argc - 1];
+    /* get anc check expr */
+    expr = argv[1];
     if (NULL != strstr(expr, "__")
         || NULL != strchr(expr, ';')
         || NULL != strchr(expr, '\'')) {
@@ -120,8 +120,11 @@ int main(int argc, char **argv)
     _ny = 0;
     /* read input images */
     DBG_CLOCK_START();
-    for (i = 0; i < nbinput; i++) {
-        in[i] = io_bds_read_flt(argv[i + 1], &nx, &ny, &nc);
+    i = 0;
+    /* read max 4 inputs */
+    while (4 > i && EOF != (c = getc(stdin))) {
+        ungetc(c, stdin);
+        in[i] = io_bds_read_flt("-", &nx, &ny, &nc);
         if (1 != nc) {
             fprintf(stderr, "only one channel per image is handled\n");
             return EXIT_FAILURE;
@@ -138,8 +141,14 @@ int main(int argc, char **argv)
                 return EXIT_FAILURE;
             }
         }
+        i++;
     }
     DBG_CLOCK_TOGGLE();
+    nbinput = i;
+    if (0 == nbinput) {
+        fprintf(stderr, "input is missing\n");
+        return EXIT_FAILURE;
+    }
     /* allocate output image */
     out = (float *) malloc(nx * ny * sizeof(float));
 
