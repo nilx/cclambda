@@ -33,8 +33,6 @@ default: $(BIN)
 
 # dependencies
 -include makefile.dep
-makefile.dep    : $(SRC)
-	$(CC) $(CPPFLAGS) -MM $^ > $@
 
 # __lambda.h formatting
 __lambda.h	: __lambda.c
