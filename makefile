@@ -17,9 +17,11 @@ COPT	=
 # complete C compiler options
 CFLAGS	= $(COPT)
 # preprocessor options
-CPPFLAGS	= -DNDEBUG -DWITH_LIBTCC
+CPPFLAGS	= -I. -DNDEBUG -DWITH_LIBTCC
 # linker options
-LDFLAGS	= -ltcc -ldl -lm
+LDFLAGS	=
+# libraries
+LDLIBS	= -ltcc -ldl -lm
 
 # openmp support
 ifdef OMP
@@ -29,21 +31,23 @@ endif
 # default target: the binary executable programs
 default: $(BIN)
 
+# dependencies
+-include makefile.dep
+makefile.dep    : $(SRC)
+	$(CC) $(CPPFLAGS) -MM $^ > $@
+
 # __lambda.h formatting
 __lambda.h	: __lambda.c
 	echo "/* xxd -i $< */" > $@
 	xxd -i $< >> $@
 
-# dependencies
-cclambda.o	: cclambda.c __lambda.h
-
 # partial C compilation xxx.c -> xxx.o
 %.o	: %.c
-	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@ $<
 
 # final link
-cclambda	: cclambda.o cclambda_lib.o io_bds.o
-	$(CC) $^ $(LDFLAGS) -o $@
+cclambda	: $(OBJ)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 # cleanup
 .PHONY	: clean distclean
