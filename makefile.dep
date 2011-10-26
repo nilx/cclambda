@@ -1,3 +1,0 @@
-cclambda.o: cclambda.c io_bds.h cclambda_lib.h
-cclambda_lib.o: cclambda_lib.c __lambda.h cclambda_lib.h
-io_bds.o: io_bds.c io_bds.h

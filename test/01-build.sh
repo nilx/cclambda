@@ -7,11 +7,14 @@ _test_run() {
     TEMPFILE=$(tempfile)
     ./test/rw data/lena_gray.png - \
 	| CC=$1 ./cclambda "$EXPR" > ${TEMPFILE}
+    rm -f ${TEMPFILE}
 }
 
 ################################################
 
 _log_init
+
+_log make -C ../io_utils/ rw clean
 
 echo "* default build, test will all compilers, clean, rebuild"
 _log make -B debug
