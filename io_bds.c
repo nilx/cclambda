@@ -344,6 +344,7 @@ float *io_bds_read_flt(const char *fname,
     if (0 == strcmp(fname, "-")) {
         fp = stdin;
 #ifdef WIN32                    /* set the stream to binary mode */
+        fflush(fp);
         setmode(fileno(fp), O_BINARY);
 #endif
     }
@@ -392,6 +393,7 @@ void io_bds_write_flt(const char *fname, const float *data,
     if (0 == strcmp(fname, "-")) {
         fp = stdout;
 #ifdef WIN32                    /* set the stream to binary mode */
+        fflush(fp);
         setmode(fileno(fp), O_BINARY);
 #endif
     }
